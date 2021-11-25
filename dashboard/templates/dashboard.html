@@ -1,0 +1,422 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<style>
+#chartdiv {
+  width: 100%;
+  height: 500px;
+}
+#date_vs_purchase_chart {
+  width: 100%;
+  height: 500px;
+}
+
+#paymentchartdiv {
+  width: 100%;
+  height: 500px;
+}
+</style>
+<div class="container-fluid">
+    <div class="card mt-4 ml-4 mr-4 mb-0">
+        <div class="card-body d-flex justify-content-end align-items-center mb-0">
+            <form class="form-inline">
+                <select onchange="changeFunc();" id="selected_range" name="selected_range"
+                        class="form-control mr-3">
+                    <option value="today" {% if request.GET.selected_range|stringformat:'s' == 'today' %}
+                            selected {% endif %}>Today
+                    </option>
+                    <option value="yesterday"
+                            {% if request.GET.selected_range|stringformat:'s' == 'yesterday' %}
+                            selected {% endif %}>Yesterday
+                    </option>
+                    <option value="last_seven_days"
+                            {% if request.GET.selected_range|stringformat:'s' == 'last_seven_days' %}
+                            selected {% endif %} >last 7th days
+                    </option>
+                    <option value="last_thirty_days"
+                            {% if request.GET.selected_range|stringformat:'s' == 'last_thirty_days' or not request.GET %}
+                            selected {% endif %}>Last 30 days
+                    </option>
+                    <option value="custom" {% if request.GET.selected_range|stringformat:'s' == 'custom' %}
+                            selected {% endif %}>Custom
+                    </option>
+                </select>
+                <input type="hidden" id="start_date" name="startdate" value="{{ request.GET.startdate }}">
+                <input type="hidden" id="end_date" name="enddate" value="{{ request.GET.enddate }}">
+                <button class="btn btn-warning">Filter</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row p-4">
+        <div class="col-lg-3">
+            <div class="widget style1 dashboard-card">
+                <div class="row">
+                    <div class="col-8">
+                        <p> Total Purchases </p>
+                        <h2 class="font-bold">{{ total_purchases }}</h2>
+                    </div>
+                    {#                            <div class="col-4">#}
+                    {#                                <i class="fa fa-clock-o fa-5x"></i>#}
+                    {#                            </div>#}
+
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="widget style1 dashboard-card">
+                <div class="row">
+                    <div class="col-8">
+                        <p> Total Students  </p>
+                        <h2 class="font-bold">{{  total_stuents  }}</h2>
+                    </div>
+                    {#                            <div class="col-4">#}
+                    {#                                <i class="fa fa-check fa-5x"></i>#}
+                    {#                            </div>#}
+                </div>
+            </div>
+
+        </div>
+        <div class="col-lg-3">
+            <div class="widget style1 dashboard-card">
+                <div class="row">
+                    <div class="col-8">
+                        <p> Total Instructors </p>
+                        <h2 class="font-bold">{{ total_instructors }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="widget style1 dashboard-card">
+                <div class="row">
+                    <div class="col-8">
+                        <p>  Sum of Volume (sales) </p>
+                        <h2 class="font-bold"> {% if sum_of_volume %} {{ sum_of_volume }} {% else %} 0 {% endif %} </h2>
+                    </div>
+                    {#                            <div class="col-4">#}
+                    {#                                <i class="fa fa-home fa-5x"></i>#}
+                    {#                            </div>#}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row px-4 pt-0 pb-4">
+
+        <div class="col-lg-3">
+            <div class="widget style1 dashboard-card">
+                <div class="row">
+                    <div class="col-8">
+                        <p>  Free Course Sold</p>
+                        <h2 class="font-bold">{{ free_course_sold }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3">
+            <div class="widget style1 dashboard-card">
+                <div class="row">
+                    <div class="col-8">
+                        <p> Paid Course Sold</p>
+                        <h2 class="font-bold">{{ paid_course_sold }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3">
+            <div class="widget style1 dashboard-card">
+                <div class="row">
+
+                    <div class="col-8">
+                        <p>Special Discount Sold </p>
+                        <h2 class="font-bold">{{ special_offer_course_sold }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3">
+            <div class="widget style1 dashboard-card">
+                <div class="row">
+{#                    <div class="col-4">#}
+{#                        <i class="fa fa-clock-o fa-5x"></i>#}
+{#                    </div>#}
+                    <div class="col-8">
+                        <p>Total Coupon Used</p>
+                        <h2 class="font-bold">{{ coupon_used }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<div class="row p-4">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInRight">
+            <div class="card">
+                <h3 class="card-header" style="background-color: #081E3C; color:#fff">Date VS Purchase Count</h3>
+                <div class="card-body">
+                    <div id="chartdiv" style="min-height: 10rem"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row p-4">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInRight">
+            <div class="card">
+                <h3 class="card-header" style="background-color: #081E3C; color:#fff">Date VS Purchase Count</h3>
+                <div class="card-body">
+                    <div id="date_vs_purchase_chart" style="min-height: 10rem"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row p-4">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInRight">
+            <div class="card">
+                <h3 class="card-header" style="background-color: #081E3C; color:#fff">Payment Method</h3>
+                <div class="card-body">
+                    <div id="paymentchartdiv" style="min-height: 10rem"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="row p-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h5>Top 10 Most Sold Courses</h5>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0">
+                <table class="table table-hover table-striped table-borderless text-nowrap">
+                  <thead>
+                    <tr>
+                      <th>Course Name</th>
+                      <th>Sold</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    
+                    {% for i in course_sold_count %}
+                    <tr>
+                      <td>{{ i.course__name }}</td>
+                      <td>{{ i.course_count }}</td>
+                      
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+        </div>
+
+ </div>
+
+
+<br>
+        <div class="row">
+            <div class="col-md-12">
+                <h1 style="text-align: center;" class="fs-1">Need permission to watch data</h1>
+            </div>
+        </div>
+
+
+{% endblock %}
+
+
+
+{% block script %}
+    <script>
+        function changeFunc() {
+            var selectBox = document.getElementById("selected_range");
+            var selectedValue = selectBox.options[selectBox.selectedIndex].value;
+            if (selectedValue == 'custom') {
+                $('#selectDate').modal('show');
+            }
+        }
+    </script>
+    <script src="{% static 'js/custom/date_range.js' %}"></script>
+
+
+<!-- Resources -->
+<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+
+
+
+<script>
+payment_method_chart=  "{{ payment_method_chart|safe }}"
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+// Create chart instance
+var chart = am4core.create("paymentchartdiv", am4charts.PieChart);
+
+// Add data
+chart.data = eval(payment_method_chart);
+
+// Add and configure Series
+var pieSeries = chart.series.push(new am4charts.PieSeries());
+pieSeries.dataFields.value = "count";
+pieSeries.dataFields.category = "payment_type";
+pieSeries.innerRadius = am4core.percent(50);
+pieSeries.ticks.template.disabled = true;
+pieSeries.labels.template.disabled = true;
+
+var rgm = new am4core.RadialGradientModifier();
+rgm.brightnesses.push(-0.8, -0.8, -0.5, 0, - 0.5);
+pieSeries.slices.template.fillModifier = rgm;
+pieSeries.slices.template.strokeModifier = rgm;
+pieSeries.slices.template.strokeOpacity = 0.4;
+pieSeries.slices.template.strokeWidth = 0;
+
+chart.legend = new am4charts.Legend();
+chart.legend.position = "right";
+
+}); // end am4core.ready()
+</script>
+
+
+<!-- Chart code -->
+<script>
+ var date_vs_purchase_count= "{{ date_vs_purchase_count|safe }}"
+am4core.ready(function() {
+   
+am4core.useTheme(am4themes_animated);
+var date_vs_purchase_count_chart = am4core.create("chartdiv", am4charts.XYChart);
+date_vs_purchase_count_chart.paddingRight = 20;
+
+// Add data
+date_vs_purchase_count_chart.data = eval(date_vs_purchase_count)
+
+// Create axes
+var categoryAxis = date_vs_purchase_count_chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.dataFields.category = "date";
+categoryAxis.renderer.minGridDistance = 50;
+categoryAxis.renderer.grid.template.location = 0.5;
+categoryAxis.startLocation = 0.5;
+categoryAxis.endLocation = 0.5;
+
+// Create value axis
+var valueAxis = date_vs_purchase_count_chart.yAxes.push(new am4charts.ValueAxis());
+valueAxis.baseValue = 0;
+
+// Create series
+var series = date_vs_purchase_count_chart.series.push(new am4charts.LineSeries());
+series.dataFields.valueY = "count";
+series.dataFields.categoryX = "date";
+series.strokeWidth = 2;
+series.tensionX = 0.77;
+
+// bullet is added because we add tooltip to a bullet for it to change color
+var bullet = series.bullets.push(new am4charts.Bullet());
+bullet.tooltipText = "{valueY}";
+
+bullet.adapter.add("fill", function(fill, target){
+    if(target.dataItem.valueY < 0){
+        return am4core.color("#FF0000");
+    }
+    return fill;
+})
+var range = valueAxis.createSeriesRange(series);
+range.value = 0;
+range.endValue = -1000;
+range.contents.stroke = am4core.color("#FF0000");
+range.contents.fill = range.contents.stroke;
+
+// Add scrollbar
+var scrollbarX = new am4charts.XYChartScrollbar();
+scrollbarX.series.push(series);
+date_vs_purchase_count_chart.scrollbarX = scrollbarX;
+
+date_vs_purchase_count_chart.cursor = new am4charts.XYCursor();
+
+});
+
+
+
+
+
+ var date_vs_purchase_volume= "{{ date_vs_purchase_volume|safe }}"
+am4core.ready(function() {
+   
+am4core.useTheme(am4themes_animated);
+var date_vs_purchase_volume_chart = am4core.create("date_vs_purchase_chart", am4charts.XYChart);
+date_vs_purchase_volume_chart.paddingRight = 20;
+
+// Add data
+date_vs_purchase_volume_chart.data = eval(date_vs_purchase_volume)
+
+// Create axes
+var categoryAxis = date_vs_purchase_volume_chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.dataFields.category = "date";
+categoryAxis.renderer.minGridDistance = 50;
+categoryAxis.renderer.grid.template.location = 0.5;
+categoryAxis.startLocation = 0.5;
+categoryAxis.endLocation = 0.5;
+
+// Create value axis
+var valueAxis = date_vs_purchase_volume_chart.yAxes.push(new am4charts.ValueAxis());
+valueAxis.baseValue = 0;
+
+// Create series
+var series = date_vs_purchase_volume_chart.series.push(new am4charts.LineSeries());
+series.dataFields.valueY = "purchase_volume";
+series.dataFields.categoryX = "date";
+series.strokeWidth = 2;
+series.tensionX = 0.77;
+
+// bullet is added because we add tooltip to a bullet for it to change color
+var bullet = series.bullets.push(new am4charts.Bullet());
+bullet.tooltipText = "{valueY}";
+
+bullet.adapter.add("fill", function(fill, target){
+    if(target.dataItem.valueY < 0){
+        return am4core.color("#FF0000");
+    }
+    return fill;
+})
+var range = valueAxis.createSeriesRange(series);
+range.value = 0;
+range.endValue = -1000;
+range.contents.stroke = am4core.color("#FF0000");
+range.contents.fill = range.contents.stroke;
+
+// Add scrollbar
+var scrollbarX = new am4charts.XYChartScrollbar();
+scrollbarX.series.push(series);
+date_vs_purchase_volume_chart.scrollbarX = scrollbarX;
+
+date_vs_purchase_volume_chart.cursor = new am4charts.XYCursor();
+
+});
+
+
+</script>
+
+<!-- HTML -->
+
+{% endblock %}

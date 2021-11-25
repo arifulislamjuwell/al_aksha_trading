@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+}
+.card {
+    border-radius: .5rem;
+}
+
+.sidebar-dark-warning .nav-sidebar>.nav-item>.nav-link.active, .sidebar-light-warning .nav-sidebar>.nav-item>.nav-link.active {
+    background-color: #F39200;
+    color: #1f2d3d;
+}
+
+.dashboard-card {
+    padding: 1.5rem 1rem;
+    background-color: #fff;
+    border-radius: 0;
+    transition: box-shadow 500ms;
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+    margin: 0;
+}
+
+.dashboard-card p {
+    color: darkgrey;
+    font-size: 13px;
+    font-weight: 500;
+}
+.dashboard-card h2 {
+    font-size: 30px;
+}
+
+
+.text-truncate-after-2-line {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: inherit;
+}
+
+.landing_image {
+    width: 100px;
+    height: 60px;
+}

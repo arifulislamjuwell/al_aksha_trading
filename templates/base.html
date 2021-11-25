@@ -1,0 +1,58 @@
+
+{% load static %}
+<html>
+<head>
+
+    {% include 'partial/head.html' %}
+
+    {% block css %}
+    {% endblock %}
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed ">
+<div class="wrapper">
+
+  {% include 'navbar.html' %}
+  {% block navbar %}
+  {% endblock %}
+
+  {% include 'sidebar.html' %}
+  {% block sidebar %}
+  {% endblock %}
+
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper" style="height: auto">
+  {% include 'messages.html' %}
+
+      {% block content %}
+      {% endblock %}
+
+  </div>
+  <!-- /.content-wrapper -->
+ {% include 'footer.html' %}
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+{% include 'partial/script.html' %}
+<script>
+toastr.options = {
+    "debug": false,
+    "positionClass": "toast-bottom-right",
+    "onclick": null,
+    "fadeIn": 300,
+    "fadeOut": 1000,
+    "timeOut": 6000,
+    "extendedTimeOut": 2000
+  }
+</script>
+{% block script %}
+{% endblock %}
+</body>
+</html>
