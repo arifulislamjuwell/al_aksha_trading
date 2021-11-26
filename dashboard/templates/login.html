@@ -29,7 +29,7 @@
                 {% endif %}
 			</div>
 
-      <form method="POST" action="{% url 'auth:dashboard_login_url' %}" id="loginForm">
+      <form method="POST" action="{% url 'login_url' %}" id="loginForm">
       {% csrf_token %}
         <div class="input-group mb-3">
          <input type="text" placeholder="01711xxxxxx" title="Please enter you username" required name="username" id="username" class="form-control">

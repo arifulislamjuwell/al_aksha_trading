@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-3">
+                              
+                                <input value="{{ request.GET.customer }}" name="customer" placeholder="Name, Phone Number" type="text" class="form-control"/>
+                            </div>
+ 
+                            <div class="col-md-3">
+                            
+                                <select name="area" class="form-control">
+                                    <option disabled selected>Select Area</option>
+                                    {% for a in area %}
+                                    <option value="{{ a.id }}" {% if request.GET.area|stringformat:'s' == a.id|stringformat:'s' %}selected{% endif %}>{{ a.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                           
+                                <button class="btn btn-block btn-secondary">Filter</button>
+                            </div>
+ 
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card mt-3">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-10">
+                                <h5>Transaction List</h5>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card-body table-responsive">
+
+                        <table id="seller_list" class="table table-borderless table-striped table-hover">
+ 
+                            <tr>
+                                <th>ID</th>
+                                <th>Name </th>
+                                <th>Mobile Number</th>
+                                <th>Transaction Type</th>
+                                <th>Date</th>
+                                <th> Amount</th>
+                                <th>Current Balance</th>
+
+                            </tr>
+                            {% for trans in transaction %}
+                            <tr id="{{ trans.id }}">
+                                <td>{{ trans.id }} </td>
+                                <td>{{ trans.customer.name }} </td>
+                                <td >{{ trans.customer.phone_number }}</td>
+                                <td >{{ trans.get_transaction_type_display }}</td>
+                                <td >{{ trans.created_at }}</td>
+                                <td >{{ trans.amount }}</td>
+                                <td >{{ trans.current_balance }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create Customer</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST">
+          {% csrf_token %}
+      <div class="modal-body">
+       
+        <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Name</label>
+            <div class="col-sm-10">
+            <input name="name" type="text" class="form-control" id="name" required>
+            </div>
+        </div>
+         <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Phone Number</label>
+            <div class="col-sm-10">
+            <input type="text" class="form-control" name="phone_number" id="phone_number" required>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
+            <div class="col-sm-10">
+            <input type="text" class="form-control" id="email" name="email">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Area</label>
+            <div class="col-sm-10">
+                <select name="area" class="form-control" id="area" required>
+                <option value=""> Select Area</option>
+
+                {% for i in area %}
+                <option value="{{ i.id }}"> {{ i.name }}</option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
+         <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Address</label>
+            <div class="col-sm-10">
+            <textarea name="address" class="form-control" required> </textarea>
+            </div>
+        </div>
+       
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="suubmit" class="btn btn-primary"> Create</button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+
+{% endblock %}

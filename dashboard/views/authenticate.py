@@ -24,7 +24,7 @@ class AuthenticationView(View):
 
     def post(self, request):
         if request.resolver_match.url_name == 'login_url':
-            username= request.POST['number'].strip()
+            username= request.POST['username'].strip()
             password= request.POST['password'].strip()
 
             try:
@@ -36,6 +36,6 @@ class AuthenticationView(View):
                 user= auth.authenticate(username=user.username, password=password)
                 if user is not None:
                     auth.login(request, user)
-                    return redirect('dashboard_url')
+                    return redirect('dashboard:dashboard_url')
             else:
                 return render(request,'login.html',{'error':'Password doesn\'t match '})

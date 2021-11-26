@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-3">
+                              
+                                <input value="{{ request.GET.customer }}" name="customer" placeholder="Name, Phone Number" type="text" class="form-control"/>
+                            </div>
+
+                            <div class="col-md-3">
+                                <select name="area" class="form-control">
+                                    <option disabled selected>Select Area</option>
+                                    {% for a in area %}
+                                    <option value="{{ a.id }}" {% if request.GET.area|stringformat:'s' == a.id|stringformat:'s' %}selected{% endif %}>{{ a.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                            
+                                <select name="type" class="form-control">
+                                    <option value="">Select Type</option>
+                                    <option  {% if request.GET.type|stringformat:'s' == '1' %}selected{% endif %} value="1"> OPC</option>
+                                    <option  {% if request.GET.type|stringformat:'s' == '2' %}selected{% endif %} value="2">PCC </option>
+
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                           
+                                <button class="btn btn-block btn-secondary">Filter</button>
+                            </div>
+ 
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card mt-3">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-10">
+                                <h5>Sell List</h5>
+                            </div>
+
+                            <div class="col-md-2">
+                            <a href="{% url 'dashboard:create_sell_url' %}">
+                                   <button type="button" class="btn btn-primary">
+                               Create Sell
+                                </button>
+                            </a>
+
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div class="card-body table-responsive">
+
+                        <table id="seller_list" class="table table-borderless table-striped table-hover">
+ 
+                            <tr>
+                                <th>ID</th>
+                                <th>Customer Name </th>
+                                <th>Cement</th>
+                                <th>Delivery Address</th>
+                                <th>Date</th>
+
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                                <th>Paid</th>
+
+                            </tr>
+                            {% for cus in sell %}
+                            <tr id="{{ cus.id }}">
+                                <td>{{ cus.id }} </td>
+                                <td>{{ cus.customer.name }} </td>
+                                <td >{{ cus.get_cement_type_display }}</td>
+                                <td>{{ cus.delivery_address }} </td>
+                                <td>{{ cus.created_at }} </td>
+
+                                <td >{{ cus.quantity }}</td>
+                                <td >{{ cus.unit_price }}</td>
+                                <td >{{ cus.total_bill }}</td>
+                                <td >{{ cus.paid_amount }}</td>
+
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create sell</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST">
+          {% csrf_token %}
+      <div class="modal-body">
+       
+        <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Name</label>
+            <div class="col-sm-10">
+            <input name="name" type="text" class="form-control" id="name" required>
+            </div>
+        </div>
+         <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Phone Number</label>
+            <div class="col-sm-10">
+            <input type="text" class="form-control" name="phone_number" id="phone_number" required>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
+            <div class="col-sm-10">
+            <input type="text" class="form-control" id="email" name="email">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Area</label>
+            <div class="col-sm-10">
+                <select name="area" class="form-control" id="area" required>
+                <option value=""> Select Area</option>
+
+                {% for i in area %}
+                <option value="{{ i.id }}"> {{ i.name }}</option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
+         <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Address</label>
+            <div class="col-sm-10">
+            <textarea name="address" class="form-control" required> </textarea>
+            </div>
+        </div>
+       
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="suubmit" class="btn btn-primary"> Create</button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+
+
+{% endblock %}

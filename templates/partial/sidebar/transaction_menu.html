@@ -1,0 +1,10 @@
+
+
+    <li class="nav-item menu-open">
+    <a href="{% url 'dashboard:transaction_url' %}" class="nav-link {% if request.resolver_match.url_name == 'transaction_url' %} active {% endif %}">
+        <i class="nav-icon fas fa-tachometer-alt"></i>
+        <p>
+        Transaction
+        </p>
+    </a>
+    </li>
