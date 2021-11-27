@@ -5,8 +5,10 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import User
 import logging
+from dashboard.models import Stock
 
 class DashboardView(View):
 
     def get(self, request):
-        return render(request, 'dashboard.html')
+        stock= Stock.objects.first()
+        return render(request, 'dashboard.html', {'stock': stock}) 

@@ -11,31 +11,13 @@ logger = logging.getLogger('tutul_traders')
 class PurchaseView(View):
 
     def get(self, request):
-        # data= request.GET
-        # customer_search= data.get('customer')
-        # area_search= data.get('area')
-        # cement_search= data.get('type')
+        data= request.GET
 
-        # customer= Customer.objects.all()
-        # sell= Sell.objects.all()
-        # area= Area.objects.all()
-
-        # if cement_search:
-        #     sell= sell.filter(cement_type= cement_search)
-        # if customer_search:
-        #      sell= sell.filter(
-        #          Q(customer__name__icontains= customer_search) |
-        #          Q(customer__phone_number__icontains= customer_search)
-        #      )
-        # if area_search:
-        #     sell= sell.filter(customer__area__id= area_search)
-
-        # context={
-        #     'customer': customer,
-        #     'area': area,
-        #     'sell': sell
-        # }
-        return render(request, 'purchase.html')
+        purchase= Purchase.objects.all()
+        context={
+             'purchase': purchase,
+        }
+        return render(request, 'purchase.html', context)
 
     
 class CreatePurchaseView(View):
@@ -84,3 +66,22 @@ class CreatePurchaseView(View):
             pcc.save()
 
         return redirect('dashboard:purchase_url')
+
+class CommissionView(View):
+
+    def get(self, request):
+        data= request.GET
+        name= data.get('area')
+        area= Commission.objects.all()
+        if name:
+            area= area.filter(name__icontains= name)
+        context={
+            'area': area
+        }
+        return render( request, 'area.html', context)
+
+    def post(self, request):
+        data= request.POST
+        name= data.get('name')
+        Area.objects.create(name= name)
+        return redirect('dashboard:area_url')

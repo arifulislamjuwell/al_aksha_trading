@@ -29,14 +29,14 @@ class Purchase(models.Model):
 
 
 class OpcPurchase(models.Model):
-    purchase= models.OneToOneField(Purchase ,on_delete=models.CASCADE)
+    purchase= models.OneToOneField(Purchase , related_name= "opc_purchase",on_delete=models.CASCADE)
     quantity= models.IntegerField()
     unit_price= models.FloatField()
     total= models.IntegerField()
 
 
 class PccPurchase(models.Model):
-    purchase= models.OneToOneField(Purchase ,on_delete=models.CASCADE)
+    purchase= models.OneToOneField(Purchase ,related_name= "pcc_purchase",on_delete=models.CASCADE)
     quantity= models.IntegerField()
     unit_price= models.FloatField()
     total= models.IntegerField()
@@ -80,6 +80,15 @@ class Sell(models.Model):
 @receiver(post_save, sender=Sell)
 def update_transaction(sender, instance, created, **kwargs):
     if created:
+        stock= Stock.objects.first()
+
+        if instance.cement_type == OPC:
+            stock.opc -= instance.quantity
+
+        else:
+            stock.pcc -= instance.quantity
+            stock.save()
+ 
         transaction_type= None
         total_amount= instance.total_bill
         paid_amount= instance.paid_amount
@@ -176,3 +185,32 @@ def update_transaction(sender, instance, created, **kwargs):
 class Stock(models.Model):
     pcc= models.IntegerField(default= 0)
     opc= models.IntegerField(default= 0)
+
+
+
+@receiver(post_save, sender=OpcPurchase)
+def opc_stock_update(sender, instance, created, **kwargs):
+    if created:
+        stock= Stock.objects.first()
+        stock.opc += int(instance.quantity)
+        stock.save()
+
+@receiver(post_save, sender=PccPurchase)
+def pcc_stock_update(sender, instance, created, **kwargs):
+    if created:
+        stock= Stock.objects.first()
+        stock.pcc += int(instance.quantity)
+        stock.save()
+ 
+
+class Commission(models.Model):
+    date= models.DateField(auto_now_add=True)
+    amount= models.IntegerField()
+    unit_amount= models.IntegerField()
+
+
+class MyyTransaction(models.Model):
+    transaction_type= models.PositiveSmallIntegerField(choices= TRANSACTION_TYPE)
+    amount= models.IntegerField()
+    current_balance= models.IntegerField(default=0)
+    created_at= models.DateTimeField(auto_now_add=True)

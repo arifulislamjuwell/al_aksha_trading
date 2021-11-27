@@ -7,7 +7,7 @@ from dashboard.views.customer import CustomerView
 from dashboard.views.area import AreaView
 from dashboard.views.sell import SellView, CreateSellView
 from dashboard.views.deposite import DepositeView, TransactionView
-from dashboard.views.purchase import PurchaseView, CreatePurchaseView
+from dashboard.views.purchase import PurchaseView, CreatePurchaseView, CommissionView
 
 app_name= 'dashboard'
 
@@ -21,6 +21,8 @@ urlpatterns = [
     path('transaction/', TransactionView.as_view(), name="transaction_url"),
     path('purchase/', PurchaseView.as_view(), name="purchase_url"),
     path('create-purchase/', CreatePurchaseView.as_view(), name="create_purchase_url"),
+    path('commission/', CommissionView.as_view(), name="commission_url"),
+
 
 
 
