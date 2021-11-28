@@ -44,15 +44,10 @@ class DepositeView(View):
 
     
 class TransactionView(View):
-    def get(self, request):
+    def get(self, request, id):
         data= request.GET
-        customer_search= data.get('customer')
-        transaction= CustomerTransaction.objects.all().order_by('-id')
-        if customer_search:
-            deposite= deposite.filter(
-                Q(customer__name__icontains= customer_search) |
-                Q(customer__phone_number__icontains= customer_search)
-            )
+
+        transaction= CustomerTransaction.objects.filter(customer__id= id).order_by('-id')
 
         context={
             'transaction': transaction,

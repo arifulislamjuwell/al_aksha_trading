@@ -11,6 +11,7 @@ CEMENT_TYPE= (
 )
 DEPOSITE=1
 BUY=2
+
 PURCHASE = ((1, 'OPC'),
                (2, 'PCC'))
 
@@ -19,7 +20,29 @@ TRANSACTION_TYPE= (
     (DEPOSITE, 'Deposite'),
     (BUY, 'Buy')
 )
+def get_my_cur_balance():
+    curr= MyTransaction.objects.all().order_by('-id')
+    return curr[0].current_balance if curr.exists() else 0
 
+class MyTransaction(models.Model):
+    transaction_type= models.PositiveSmallIntegerField(choices= TRANSACTION_TYPE)
+    amount= models.IntegerField()
+    current_balance= models.IntegerField(default=0)
+    created_at= models.DateField(auto_now_add=True)
+
+class MyDeposite(models.Model):
+    amount= models.IntegerField()
+    created_at= models.DateField( auto_now_add=True)
+
+@receiver(post_save, sender=MyDeposite)
+def update_my_deposite_transaction(sender, instance, created, **kwargs):
+    if created:
+        my_transaction= MyTransaction()
+        my_transaction.transaction_type = DEPOSITE
+        my_transaction.amount= instance.amount
+        cur= get_my_cur_balance()
+        my_transaction.current_balance= int(cur) + int(instance.amount)
+        my_transaction.save()
 
 class Purchase(models.Model):
     sub_total= models.IntegerField()
@@ -27,6 +50,73 @@ class Purchase(models.Model):
     cement_type= MultiSelectField(choices= PURCHASE)
     created_at= models.DateField( auto_now_add=True)
 
+
+@receiver(post_save, sender=Purchase)
+def update_my_transaction(sender, instance, created, **kwargs):
+    if created:
+
+        total_amount= instance.sub_total
+        paid_amount= instance.paid
+        try:
+            my_transaction= MyTransaction.objects.all().order_by('-id')[0]
+        except:
+            my_transaction= None
+
+        if my_transaction:
+            if my_transaction.current_balance != 0:
+                if paid_amount == 0:
+                    if my_transaction.current_balance > total_amount or (my_transaction.current_balance < total_amount):
+                        my_transaction= MyTransaction()
+                        my_transaction.transaction_type = BUY
+                        my_transaction.amount= total_amount
+                        cur= get_my_cur_balance()
+                        my_transaction.save()
+                        my_transaction.current_balance = int(cur) + (-total_amount)
+                        my_transaction.save()
+                else:
+                    deposite= MyDeposite()
+                    deposite.amount = paid_amount
+                    deposite.save()
+
+                    my_transaction= MyTransaction()
+                    my_transaction.transaction_type = BUY
+                    my_transaction.amount= total_amount
+                    cur= get_my_cur_balance()
+                    my_transaction.save()
+                    my_transaction.current_balance = int(cur) + (-total_amount)
+                    my_transaction.save()
+                
+        else:
+            if total_amount == paid_amount:
+                my_transaction= MyTransaction()
+                my_transaction.transaction_type = BUY
+                my_transaction.amount= total_amount
+                cur= get_my_cur_balance()
+                my_transaction.save()
+                my_transaction.current_balance = int(cur) + (-total_amount)
+                my_transaction.save()
+
+            if paid_amount != 0:
+                if total_amount > paid_amount:
+                    deposite= MyDeposite()
+                    deposite.amount = paid_amount
+                    deposite.save()
+
+                    my_transaction= MyTransaction()
+                    my_transaction.transaction_type = BUY
+                    my_transaction.amount= total_amount
+                    cur= get_my_cur_balance()
+                    my_transaction.save()
+                    my_transaction.current_balance = int(cur) + (-int(total_amount))
+                    my_transaction.save()
+            else:
+                my_transaction= MyTransaction()
+                my_transaction.transaction_type = BUY
+                my_transaction.amount= total_amount
+                cur= get_my_cur_balance()
+                my_transaction.save()
+                my_transaction.current_balance = int(cur) + (-int(total_amount))
+                my_transaction.save()
 
 class OpcPurchase(models.Model):
     purchase= models.OneToOneField(Purchase , related_name= "opc_purchase",on_delete=models.CASCADE)
@@ -89,7 +179,6 @@ def update_transaction(sender, instance, created, **kwargs):
             stock.pcc -= instance.quantity
             stock.save()
  
-        transaction_type= None
         total_amount= instance.total_bill
         paid_amount= instance.paid_amount
         try:
@@ -206,11 +295,4 @@ def pcc_stock_update(sender, instance, created, **kwargs):
 class Commission(models.Model):
     date= models.DateField(auto_now_add=True)
     amount= models.IntegerField()
-    unit_amount= models.IntegerField()
-
-
-class MyyTransaction(models.Model):
-    transaction_type= models.PositiveSmallIntegerField(choices= TRANSACTION_TYPE)
-    amount= models.IntegerField()
-    current_balance= models.IntegerField(default=0)
-    created_at= models.DateTimeField(auto_now_add=True)
+    unit_amount= models.FloatField()

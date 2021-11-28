@@ -7,7 +7,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
-            {% comment %} <div class="card mt-3">
+            <div class="card mt-3">
                 <div class="card-body">
                     <form>
                         <div class="row">
@@ -34,7 +34,7 @@
                         </div>
                     </form>
                 </div>
-            </div> {% endcomment %}
+            </div>
             <div class="card mt-3">
                     <div class="card-header">
                         <div class="row">
@@ -50,19 +50,16 @@
  
                             <tr>
                                 <th>ID</th>
-                                <th>Name </th>
-                                <th>Mobile Number</th>
+
                                 <th>Transaction Type</th>
                                 <th>Date</th>
                                 <th> Amount</th>
                                 <th>Current Balance</th>
 
                             </tr>
-                            {% for trans in transaction %}
+                            {% for trans in my_transaction %}
                             <tr id="{{ trans.id }}">
                                 <td>{{ trans.id }} </td>
-                                <td>{{ trans.customer.name }} </td>
-                                <td >{{ trans.customer.phone_number }}</td>
                                 <td >{{ trans.get_transaction_type_display }}</td>
                                 <td >{{ trans.created_at }}</td>
                                 <td >{{ trans.amount }}</td>

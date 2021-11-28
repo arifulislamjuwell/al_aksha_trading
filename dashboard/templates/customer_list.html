@@ -61,6 +61,8 @@
                                 <th>Email</th>
                                 <th>Area</th>
                                 <th>Address</th>
+                                <th>Transaction</th>
+
                             </tr>
                             {% for cus in customer %}
                             <tr id="{{ cus.id }}">
@@ -70,6 +72,11 @@
                                 <td >{{ cus.email }}</td>
                                 <td >{{ cus.area.name }}</td>
                                 <td >{{ cus.address }}</td>
+                                <td >
+                                    <a href="{% url 'dashboard:transaction_url' cus.id %}">
+                                    <button class="btn btn-primary">Show Transaction</button><a>
+                                </td>
+
                             </tr>
                             {% endfor %}
                         </table>
