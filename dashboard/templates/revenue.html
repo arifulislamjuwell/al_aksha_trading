@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <input name="month" type="month" class="form-control" id="month">
+                            </div>
+                            <div class="col-md-3">
+                                <select name="customer" class="form-control">
+                                    <option disabled selected>Select Area</option>
+                                    {% for a in customer %}
+                                    <option value="{{ a.id }}" {% if request.GET.customer|stringformat:'s' == a.id|stringformat:'s' %}selected{% endif %}>{{ a.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                           
+                                <button class="btn btn-block btn-secondary">Filter</button>
+                            </div>
+ 
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card mt-3">
+
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <form method="POST" action="{% url 'dashboard:generate_revenue_url' %}">
+                                    {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <input required name="month" type="month" class="form-control" id="month">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input required min="1" step="1" oninput="validity.valid||(value='');" name="pcc" type="number" class="form-control" id="pcc" placeholder="pcc">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input required min="1" step="1" oninput="validity.valid||(value='');" name="opc" type="number" class="form-control" id="opc" placeholder="opc">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="btn btn-primary">
+                                            Generate Revenue
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </form>
+
+
+                            </div>
+
+                        </div>
+                    </div>
+                
+                    <div class="card-body table-responsive">
+
+                        <table id="seller_list" class="table table-borderless table-striped table-hover">
+ 
+                            <tr>
+                                <th>ID</th>
+                                <th>Month </th>
+                                <th>Customer Name </th>
+                                <th>Customer Phone </th>
+                                <th>Customer Sell </th>
+
+                                <th> Purchase Price</th>
+                                <th>Revenue</th>
+                            </tr>
+                            {% for cus in revenue %}
+                            <tr id="{{ cus.id }}">
+                                <td>{{ cus.id }} </td>
+                                <td>{{ cus.date }} </td>
+                                <td>{{ cus.customer.name }} </td>
+                                <td>{{ cus.customer.phone_number }} </td>
+                                <td >{{ cus.total_sell }}</td>
+                                <td >{{ cus.total_purchase }}</td>
+                                <td >{{ cus.revenue }}</td>
+
+
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+
+{% endblock %}
+
+{% block script %}
+
+
+
+{% endblock %}

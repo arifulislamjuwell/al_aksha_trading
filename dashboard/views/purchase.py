@@ -72,9 +72,9 @@ class CommissionView(View):
     def get(self, request):
         data= request.GET
         name= data.get('area')
-        commission= Commission.objects.all()
+        commission= Commission.objects.all().order_by('-id')
         if name:
-            area= area.filter(name__icontains= name)
+            commission= commission.filter(name__icontains= name)
         context={
             'commission': commission
         }
@@ -122,8 +122,12 @@ class MyDepositeView(View):
     def post(self, request):
         data= request.POST
         amount= data.get('amount')
+        note= data.get('note')
+
         depo = MyDeposite()
         depo.amount= amount
+        if note:
+            depo.note= note
         depo.save()
 
         return redirect('dashboard:my_deposite_url')

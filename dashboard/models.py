@@ -11,6 +11,7 @@ CEMENT_TYPE= (
 )
 DEPOSITE=1
 BUY=2
+COMMISSION= 3
 
 PURCHASE = ((1, 'OPC'),
                (2, 'PCC'))
@@ -33,6 +34,7 @@ class MyTransaction(models.Model):
 class MyDeposite(models.Model):
     amount= models.IntegerField()
     created_at= models.DateField( auto_now_add=True)
+    note= models.TextField(null= True)
 
 @receiver(post_save, sender=MyDeposite)
 def update_my_deposite_transaction(sender, instance, created, **kwargs):
@@ -109,6 +111,18 @@ def update_my_transaction(sender, instance, created, **kwargs):
                     my_transaction.save()
                     my_transaction.current_balance = int(cur) + (-int(total_amount))
                     my_transaction.save()
+                else:
+                    deposite= MyDeposite()
+                    deposite.amount = paid_amount
+                    deposite.save()
+
+                    my_transaction= MyTransaction()
+                    my_transaction.transaction_type = BUY
+                    my_transaction.amount= total_amount
+                    cur= get_my_cur_balance()
+                    my_transaction.save()
+                    my_transaction.current_balance = int(cur) + (-int(total_amount))
+                    my_transaction.save()  
             else:
                 my_transaction= MyTransaction()
                 my_transaction.transaction_type = BUY
@@ -292,7 +306,59 @@ def pcc_stock_update(sender, instance, created, **kwargs):
         stock.save()
  
 
+class MyRevenue(models.Model):
+    date= models.DateField(auto_now=False, auto_now_add=False)
+    total_sell= models.IntegerField(default= 0)
+    total_purchase= models.IntegerField(default= 0)
+    total_revenue= models.IntegerField(default= 0)
+
+
 class Commission(models.Model):
     date= models.DateField(auto_now_add=True)
     amount= models.IntegerField()
     unit_amount= models.FloatField()
+
+@receiver(post_save, sender=Commission)
+def commission_transaction_update(sender, instance, created, **kwargs):
+    if created:
+        my_transaction= MyTransaction()
+        my_transaction.transaction_type = COMMISSION
+        my_transaction.amount= instance.amount
+        cur= get_my_cur_balance()
+        my_transaction.current_balance= int(cur) + int(instance.amount)
+        my_transaction.save()
+
+class Revenue(models.Model):
+    customer= models.ForeignKey(Customer, related_name="revenues", on_delete=models.CASCADE)
+    date= models.DateField(auto_now=False, auto_now_add=False)
+    pcc_sell= models.IntegerField(default= 0)
+    opc_sell= models.IntegerField(default= 0)
+    pcc_purchase= models.IntegerField(default= 0)
+    opc_purchase= models.IntegerField(default= 0)
+    revenue= models.IntegerField(default= 0)
+
+    @property
+    def total_sell(self):
+        return self.opc_sell + self.pcc_sell
+    
+    @property
+    def total_purchase(self):
+        return self.pcc_purchase + self.opc_purchase
+
+@receiver(post_save, sender=Revenue)
+def upddate_my_revenue(sender, instance, created, **kwargs):
+    exists= MyRevenue.objects.filter(date__month= instance.date.month, date__year= instance.date.year)
+    if exists:
+        rev_obj= exists.first()
+    else:
+        rev_obj= MyRevenue()
+        rev_obj.date= instance.date
+
+    revenue= 0
+    for rev in Revenue.objects.filter(date__month= instance.date.month, date__year= instance.date.year):
+        revenue+= rev.revenue
+
+    rev_obj.total_sell= instance.total_sell
+    rev_obj.total_purchase= instance.total_purchase
+    rev_obj.total_revenue= revenue
+    rev_obj.save()

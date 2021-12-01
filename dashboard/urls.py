@@ -2,7 +2,7 @@
 from django.contrib import admin
 from django.urls import path, include
 
-from dashboard.views.dashboard import DashboardView
+from dashboard.views.dashboard import DashboardView, RevenueView, GenerateRevenueView
 from dashboard.views.customer import CustomerView
 from dashboard.views.area import AreaView
 from dashboard.views.sell import SellView, CreateSellView
@@ -25,6 +25,11 @@ urlpatterns = [
     path('create-purchase/', CreatePurchaseView.as_view(), name="create_purchase_url"),
     path('commission/', CommissionView.as_view(), name="commission_url"),
     path('my-transaction/', MyTransactionView.as_view(), name="my_transaction_url"),
+
+    path('revenue/', RevenueView.as_view(), name="revenue_url"),
+    path('generate-revenue/', GenerateRevenueView.as_view(), name="generate_revenue_url"),
+
+
 
 
 

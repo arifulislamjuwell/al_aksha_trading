@@ -16,9 +16,9 @@ class SellView(View):
         area_search= data.get('area')
         cement_search= data.get('type')
 
-        customer= Customer.objects.all()
-        sell= Sell.objects.all()
-        area= Area.objects.all()
+        customer= Customer.objects.all().order_by('-id')
+        sell= Sell.objects.all().order_by('-id')
+        area= Area.objects.all().order_by('-id')
 
         if cement_search:
             sell= sell.filter(cement_type= cement_search)
@@ -41,7 +41,7 @@ class SellView(View):
 class CreateSellView(View):
 
     def get(self, request):
-        customer= Customer.objects.all()
+        customer= Customer.objects.all().order_by('-id')
 
         context ={
             'customer': customer

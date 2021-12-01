@@ -14,7 +14,7 @@ class AreaView(View):
     def get(self, request):
         data= request.GET
         name= data.get('area')
-        area= Area.objects.all()
+        area= Area.objects.all().order_by('-id')
         if name:
             area= area.filter(name__icontains= name)
         context={
