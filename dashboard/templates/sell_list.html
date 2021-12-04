@@ -91,6 +91,20 @@
                                 <td >{{ cus.paid_amount }}</td>
 
                             </tr>
+                                <tr id="{{ cus.id }}">
+                                <td> </td>
+                                <td></td>
+                                <td ></td>
+                                <td></td>
+                                <td> </td>
+
+                                <td bgcolor="yellow">{{ total_data.total_quantity }}</td>
+                                <td ></td>
+                              
+                                <td bgcolor="yellow">{{ total_data.bill }}</td>
+                                <td bgcolor="yellow">{{ total_data.total_paid }}</td>
+
+                            </tr>
                             {% endfor %}
                         </table>
                     </div>

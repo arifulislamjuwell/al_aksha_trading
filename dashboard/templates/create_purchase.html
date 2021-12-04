@@ -17,84 +17,43 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <div class="custom-control custom-checkbox checkbox-lg">
-                                        <input name="opc_check" onclick="" type="checkbox" class="custom-control-input" id="opc-3">
-                                        <label class="custom-control-label" for="opc-3">OPC</label>
-                                    </div>
+                                    <small>
+                                        <label>Cement Type <small style="color: red">*</small> </label>
+                                    </small>
+                                         <select name= "cement_type" required class="form-control">
+                                            <option value='1'> OPC</option>
+                                            <option value="2">PCC</option>
+                                        </select>
                                 </div>
-                                <div class="opc_div" style="display: none;">
-                                    <div class="form-group">
-                                        <small>
-                                            <label>Quantity <small style="color: red">*</small> </label>
-                                        </small>
-                                            <input oninput="opc_update_total()"  min="1" step="1" oninput="validity.valid||(value='');" name="opc_quantity" type="number" class="form-control" id="opc_quantity">
-
-                                    </div>
-                                    <div class="form-group"> 
-                                        <small>
-                                            <label>Unit Price <small style="color: red">*</small> </label>
-                                            <input oninput="opc_update_total()" name="opc_unit_price" type="number" class="form-control" id="opc_unit_price">
-                                        </small>
-                                    </div>
-                                    <div class="form-group"> 
-                                        <small>
-                                            <label> OPC Total <small style="color: red">*</small> </label>
-                                            <input name="opc_total" type="number" class="form-control" id="opc_total">
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
                                 <div class="form-group">
-                                    <div class="custom-control custom-checkbox checkbox-lg">
-                                        <input name="pcc_check" type="checkbox" class="custom-control-input" id="pcc-3">
-                                        <label class="custom-control-label" for="pcc-3">PCC</label>
-                                    </div>
+                                    <small>
+                                        <label>Quantity <small style="color: red">*</small> </label>
+                                    </small>
+                                        <input oninput="update_total()"  min="1" step="1" oninput="validity.valid||(value='');" name="quantity" type="number" class="form-control" id="quantity">
                                 </div>
-                                <div class="pcc_div" style="display: none;">
-
-                                    <div class="form-group">
-                                        <small>
-                                            <label>Quantity <small style="color: red">*</small> </label>
-                                        </small>
-                                            <input oninput="pcc_update_total()"  min="1" step="1" oninput="validity.valid||(value='');" name="pcc_quantity" type="number" class="form-control" id="pcc_quantity">
-
-                                    </div>
-                                    <div class="form-group"> 
-                                        <small>
-                                            <label>Unit Price <small style="color: red">*</small> </label>
-                                            <input oninput="pcc_update_total()" name="pcc_unit_price" type="number" class="form-control" id="pcc_unit_price">
-                                        </small>
-                                    </div>
-                                    <div class="form-group"> 
-                                        <small>
-                                            <label> OPC Total <small style="color: red">*</small> </label>
-                                            <input name="pcc_total" type="number" class="form-control" id="pcc_total">
-                                        </small>
-                                    </div>
+                                <div class="form-group"> 
+                                    <small>
+                                        <label>Unit Price <small style="color: red">*</small> </label>
+                                        <input oninput="update_total()" name="unit_price" type="number" class="form-control" id="unit_price">
+                                    </small>
                                 </div>
-                            </div>
-                        </div>
-                    <hr style="color: black;">
-                    <div class="row">
-                        <div class="col-md-6">
-
-                            <div class="form-group">
-                                <small>
-                                    <label>Sub Total <small style="color: red">*</small> </label>
-                                </small>
-                                    <input min="1" step="1" oninput="validity.valid||(value='');" name="sub_total" type="number" class="form-control" id="sub_total" required>
-
-                            </div>
-                            <div class="form-group"> 
+                                <div class="form-group"> 
+                                    <small>
+                                        <label> Total <small style="color: red">*</small> </label>
+                                        <input name="total" type="number" class="form-control" id="total">
+                                    </small>
+                                </div>
+                                  <div class="form-group"> 
                                 <small>
                                     <label> Paid <small style="color: red">*</small> </label>
                                     <input oninput="update_total()"  min="0" step="1" oninput="validity.valid||(value='');" name="paid" type="number" class="form-control" id="paid" required>
                                 </small>
                             </div>
+                            </div>
+
                         </div>
 
-                    </div>
+
                     <button type="submit" class="btn btn-primary">Purchase</button>
                     </div>    
                     </div>
@@ -112,24 +71,7 @@
     <script>
 
 
-        function update_subtotal(){
-          
-            var opc_total=$('#opc_total').val()
-            var pcc_total=$('#pcc_total').val()
-  
-            if (opc_total != ''){
-                $('#sub_total').val(opc_total)
-            }
-            if (pcc_total != ''){
-                $('#sub_total').val(pcc_total)
-            }
-            if (opc_total !=  '' && pcc_total != ''){
-                $('#sub_total').val(Number(opc_total) + Number (pcc_total))
 
-            }
-
-        }
-        
 
         function validate(){
           
@@ -141,73 +83,23 @@
         }
         }
 
-        $(function() {
-        enable_opc();
-        $("#opc-3").click(enable_opc);
-        });
-
-        function enable_opc() {
-        if (this.checked) {
-            $('.opc_div').show()
-            $('#opc_quantity').prop('requiired', true)
-            $('#opc_unit_price').prop('requiired', true)
-            $('#opc_total').prop('requiired', true)
-
-        } else {
-            $('.opc_div').hide()
-            $('#opc_quantity').prop('requiired', false)
-            $('#opc_unit_price').prop('requiired', false)
-            $('#opc_total').prop('requiired', false)
-
-        }
-        }
 
 
-        $(function() {
-        enable_pcc();
-        $("#pcc-3").click(enable_pcc);
-        });
 
-        function enable_pcc() {
-        if (this.checked) {
-            $('.pcc_div').show()
-            $('#pcc_quantity').prop('requiired', true)
-            $('#pcc_unit_price').prop('requiired', true)
-            $('#pcc_total').prop('requiired', true)
-        } else {
-            $('.pcc_div').hide()
-            $('#pcc_quantity').prop('requiired', false)
-            $('#pcc_unit_price').prop('requiired', false)
-            $('#pcc_total').prop('requiired', false)
-        }
-        }
-
-        function opc_update_total(){
-            let quantity = $('#opc_quantity').val()
-            let unit_price= $('#opc_unit_price').val()
+        function update_total(){
+            let quantity = $('#quantity').val()
+            let unit_price= $('#unit_price').val()
             if (quantity != ''  && unit_price != ''){
 
-                $('#opc_total').val(parseInt(Number(quantity) * Number(unit_price)))
-               update_subtotal()
+                $('#total').val(parseInt(Number(quantity) * Number(unit_price)))
+               
                return
             }
-            return $('#opc_total').val(0)
+            return $('#total').val(0)
             
 
         }
-        function pcc_update_total(){
-            let quantity = $('#pcc_quantity').val()
-            let unit_price= $('#pcc_unit_price').val()
-            if (quantity != ''  && unit_price != ''){
 
-               $('#pcc_total').val(parseInt(Number(quantity) * Number(unit_price)))
-               update_subtotal()
-               return 
-            }
-            return $('#pcc_total').val(0)
-            
-
-        }
 
         $(".select2bs4").select2({
             theme: "bootstrap4",

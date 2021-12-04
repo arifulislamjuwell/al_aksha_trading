@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from dashboard.models import Area, Commission, Customer, MyDeposite, MyTransaction, OpcPurchase, PccPurchase, Purchase, Sell
+from dashboard.models import Area, Commission, Customer, MyDeposite, MyTransaction,Purchase, Sell
 from django.contrib.auth.models import User
 import logging
 from django.db.models import Q
@@ -26,44 +26,21 @@ class CreatePurchaseView(View):
         return render(request, 'create_purchase.html')
 
     def post(self,  request):
-        data= request.POST
-        purchase_type_list= []
-        
-        sub_total= data.get('sub_total')
+        data= request.POST  
+        cement_type= data,get('cement_type')
         paid=data.get('paid')
-        if data.get('opc_check'):
-            opc_quantity= data.get('opc_quantity')
-            opc_unit_price= data.get('opc_unit_price')
-            opc_total= data.get('opc_total')
-            purchase_type_list.append(1)
 
-        if data.get('pcc_check'):
-            pcc_quantity= data.get('pcc_quantity')
-            pcc_unit_price= data.get('pcc_unit_price')
-            pcc_total= data.get('pcc_total')
-            purchase_type_list.append(2)
+        quantity= data.get('quantity')
+        unit_price= data.get('unit_price')
+        total= data.get('total')
 
         purchase= Purchase()
-        purchase.sub_total= int(sub_total)
+        purchase.sub_total= int(total)
         purchase.paid= int(paid)
-        purchase.cement_type= ','.join([str(elem) for elem in purchase_type_list])
+        purchase.cement_type= int(cement_type)
+        purchase.unit_price= float(unit_price)
+        purchase.quantity= int(quantity)
         purchase.save()
-
-        if data.get('opc_check'):
-            opc= OpcPurchase()
-            opc.purchase= purchase
-            opc.quantity= int(opc_quantity)
-            opc.unit_price= float(opc_unit_price)
-            opc.total= int(opc_total)
-            opc.save()
-        
-        if data.get('pcc_check'):
-            pcc= PccPurchase()
-            pcc.purchase= purchase
-            pcc.quantity= int(pcc_quantity)
-            pcc.unit_price= float(pcc_unit_price)
-            pcc.total= int(pcc_total)
-            pcc.save()
 
         return redirect('dashboard:purchase_url')
 

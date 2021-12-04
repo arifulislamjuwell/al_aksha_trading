@@ -5,6 +5,7 @@ from dashboard.models import Area, Customer, Sell
 from django.contrib.auth.models import User
 import logging
 from django.db.models import Q
+from django.db.models import Sum
 
 logger = logging.getLogger('tutul_traders')
 
@@ -30,10 +31,13 @@ class SellView(View):
         if area_search:
             sell= sell.filter(customer__area__id= area_search)
 
+        total_data= sell.aggregate(total_quantity=Sum('quantity'), bill=Sum('total_bill'), total_paid=Sum('paid_amount'))
+    
         context={
             'customer': customer,
             'area': area,
-            'sell': sell
+            'sell': sell,
+            'total_data': total_data
         }
         return render(request, 'sell_list.html', context)
 

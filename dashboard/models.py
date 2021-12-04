@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from multiselectfield import MultiSelectField
+
 
 OPC= 1
 PCC= 2
@@ -30,6 +30,8 @@ class MyTransaction(models.Model):
     amount= models.IntegerField()
     current_balance= models.IntegerField(default=0)
     created_at= models.DateField(auto_now_add=True)
+    description= models.TextField(null=True)
+
 
 class MyDeposite(models.Model):
     amount= models.IntegerField()
@@ -49,14 +51,14 @@ def update_my_deposite_transaction(sender, instance, created, **kwargs):
 class Purchase(models.Model):
     sub_total= models.IntegerField()
     paid= models.IntegerField()
-    cement_type= MultiSelectField(choices= PURCHASE)
+    cement_type= models.PositiveSmallIntegerField(choices= CEMENT_TYPE)
+    quantity= models.IntegerField()
+    unit_price= models.FloatField()
     created_at= models.DateField( auto_now_add=True)
-
 
 @receiver(post_save, sender=Purchase)
 def update_my_transaction(sender, instance, created, **kwargs):
     if created:
-
         total_amount= instance.sub_total
         paid_amount= instance.paid
         try:
@@ -139,11 +141,7 @@ class OpcPurchase(models.Model):
     total= models.IntegerField()
 
 
-class PccPurchase(models.Model):
-    purchase= models.OneToOneField(Purchase ,related_name= "pcc_purchase",on_delete=models.CASCADE)
-    quantity= models.IntegerField()
-    unit_price= models.FloatField()
-    total= models.IntegerField()
+
 
 
 def get_cur_balance(customer):
@@ -289,22 +287,6 @@ class Stock(models.Model):
     pcc= models.IntegerField(default= 0)
     opc= models.IntegerField(default= 0)
 
-
-
-@receiver(post_save, sender=OpcPurchase)
-def opc_stock_update(sender, instance, created, **kwargs):
-    if created:
-        stock= Stock.objects.first()
-        stock.opc += int(instance.quantity)
-        stock.save()
-
-@receiver(post_save, sender=PccPurchase)
-def pcc_stock_update(sender, instance, created, **kwargs):
-    if created:
-        stock= Stock.objects.first()
-        stock.pcc += int(instance.quantity)
-        stock.save()
- 
 
 class MyRevenue(models.Model):
     date= models.DateField(auto_now=False, auto_now_add=False)
