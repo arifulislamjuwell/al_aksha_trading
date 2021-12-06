@@ -68,9 +68,8 @@
                                 <th>ID</th>
                                 <th>Date</th>
                                 <th>Cement</th>
-                                <th>OPC Details</th>
-                                <th>PCC Details</th>
-                                <th>Sub Total</th>
+                                <th>Details </th>
+                                <th>Total</th>
                                 <th>Paid</th>
                             </tr>
                             {% for cus in purchase %}
@@ -79,19 +78,13 @@
                                 <td>{{ cus.created_at }} </td>
                                 <td >{{ cus.get_cement_type_display }}</td>
                                 <td>
-                                {% if '1' in cus.cement_type %} 
-                                    OPC Quantity -{{ cus.opc_purchase.quantity }} <br>
-                                    OPC Unit Price - {{ cus.opc_purchase.unit_price }} <br>
-                                    OPC Total - {{ cus.opc_purchase.total }} 
-                                {% endif %}
+                                
+                                     Quantity -{{ cus.quantity }} <br>
+                                 Unit Price - {{ cus.unit_price }} <br>
+                                     
+            
                                 </td>
-                                <td>
-                                {% if '2' in cus.cement_type %} 
-                                    PCC Quantity - {{ cus.pcc_purchase.quantity }} <br>
-                                    PCC Unit Price - {{ cus.pcc_purchase.unit_price }} <br>
-                                    PCC Total - {{ cus.pcc_purchase.total }} 
-                                {% endif %}
-                                </td>
+
                                 <td >{{ cus.sub_total }}</td>
                                 <td >{{ cus.paid }}</td>
 

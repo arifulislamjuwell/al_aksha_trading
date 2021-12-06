@@ -16,7 +16,8 @@ class SellView(View):
         customer_search= data.get('customer')
         area_search= data.get('area')
         cement_search= data.get('type')
-
+        range= data.get('range')
+        
         customer= Customer.objects.all().order_by('-id')
         sell= Sell.objects.all().order_by('-id')
         area= Area.objects.all().order_by('-id')
@@ -30,6 +31,11 @@ class SellView(View):
              )
         if area_search:
             sell= sell.filter(customer__area__id= area_search)
+
+        if range:
+            start, end = range.split(' - ')[0], range.split(' - ')[1]
+            sell= sell.filter(created_at__range= [start, end])
+
 
         total_data= sell.aggregate(total_quantity=Sum('quantity'), bill=Sum('total_bill'), total_paid=Sum('paid_amount'))
     

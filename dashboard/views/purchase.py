@@ -27,8 +27,8 @@ class CreatePurchaseView(View):
 
     def post(self,  request):
         data= request.POST  
-        cement_type= data,get('cement_type')
-        paid=data.get('paid')
+        cement_type= data.get('cement_type')
+       
 
         quantity= data.get('quantity')
         unit_price= data.get('unit_price')
@@ -36,7 +36,7 @@ class CreatePurchaseView(View):
 
         purchase= Purchase()
         purchase.sub_total= int(total)
-        purchase.paid= int(paid)
+        purchase.paid= 0
         purchase.cement_type= int(cement_type)
         purchase.unit_price= float(unit_price)
         purchase.quantity= int(quantity)
@@ -62,6 +62,8 @@ class CommissionView(View):
         total= data.get('total')
         date= data.get('date')
         unit=  data.get('unit')
+        note=  data.get('note')
+
         exist= Commission.objects.filter(date__month= date.split('-')[1])
         if exist.exists():
             return redirect('dashboard:commission_url')
@@ -70,6 +72,7 @@ class CommissionView(View):
             commission_obj.date= date
         commission_obj.amount= int(total)
         commission_obj.unit_amount= float(unit)
+        commission_obj.note= note
         commission_obj.save()
         return redirect('dashboard:commission_url')
 

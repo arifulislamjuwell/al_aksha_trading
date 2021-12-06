@@ -19,7 +19,9 @@ PURCHASE = ((1, 'OPC'),
 
 TRANSACTION_TYPE= (
     (DEPOSITE, 'Deposite'),
-    (BUY, 'Buy')
+    (BUY, 'Buy'),
+    (COMMISSION, 'Commission'),
+
 )
 def get_my_cur_balance():
     curr= MyTransaction.objects.all().order_by('-id')
@@ -31,6 +33,7 @@ class MyTransaction(models.Model):
     current_balance= models.IntegerField(default=0)
     created_at= models.DateField(auto_now_add=True)
     description= models.TextField(null=True)
+    quantity= models.IntegerField(blank= True, null=True)
 
 
 class MyDeposite(models.Model):
@@ -46,6 +49,7 @@ def update_my_deposite_transaction(sender, instance, created, **kwargs):
         my_transaction.amount= instance.amount
         cur= get_my_cur_balance()
         my_transaction.current_balance= int(cur) + int(instance.amount)
+        my_transaction.description= instance.note
         my_transaction.save()
 
 class Purchase(models.Model):
@@ -59,8 +63,16 @@ class Purchase(models.Model):
 @receiver(post_save, sender=Purchase)
 def update_my_transaction(sender, instance, created, **kwargs):
     if created:
+        stock= Stock.objects.first()
+        if instance.cement_type == OPC:
+            stock.opc += instance.quantity
+            description= 'OPC50KG(BAG)'
+        else:
+            stock.pcc += instance.quantity
+            description= 'OPC50KG(BAG)'
+        stock.save()
         total_amount= instance.sub_total
-        paid_amount= instance.paid
+        paid_amount= 0
         try:
             my_transaction= MyTransaction.objects.all().order_by('-id')[0]
         except:
@@ -76,6 +88,8 @@ def update_my_transaction(sender, instance, created, **kwargs):
                         cur= get_my_cur_balance()
                         my_transaction.save()
                         my_transaction.current_balance = int(cur) + (-total_amount)
+                        my_transaction.description= description
+                        my_transaction.quantity= instance.quantity
                         my_transaction.save()
                 else:
                     deposite= MyDeposite()
@@ -88,6 +102,9 @@ def update_my_transaction(sender, instance, created, **kwargs):
                     cur= get_my_cur_balance()
                     my_transaction.save()
                     my_transaction.current_balance = int(cur) + (-total_amount)
+                    my_transaction.description= description
+                    my_transaction.quantity= instance.quantity
+
                     my_transaction.save()
                 
         else:
@@ -98,6 +115,9 @@ def update_my_transaction(sender, instance, created, **kwargs):
                 cur= get_my_cur_balance()
                 my_transaction.save()
                 my_transaction.current_balance = int(cur) + (-total_amount)
+                my_transaction.description= description
+                my_transaction.quantity= instance.quantity
+
                 my_transaction.save()
 
             if paid_amount != 0:
@@ -112,6 +132,8 @@ def update_my_transaction(sender, instance, created, **kwargs):
                     cur= get_my_cur_balance()
                     my_transaction.save()
                     my_transaction.current_balance = int(cur) + (-int(total_amount))
+                    my_transaction.description= description
+                    my_transaction.quantity= instance.quantity
                     my_transaction.save()
                 else:
                     deposite= MyDeposite()
@@ -124,6 +146,8 @@ def update_my_transaction(sender, instance, created, **kwargs):
                     cur= get_my_cur_balance()
                     my_transaction.save()
                     my_transaction.current_balance = int(cur) + (-int(total_amount))
+                    my_transaction.description= description
+                    my_transaction.quantity= instance.quantity
                     my_transaction.save()  
             else:
                 my_transaction= MyTransaction()
@@ -132,16 +156,9 @@ def update_my_transaction(sender, instance, created, **kwargs):
                 cur= get_my_cur_balance()
                 my_transaction.save()
                 my_transaction.current_balance = int(cur) + (-int(total_amount))
+                my_transaction.description= description
+                my_transaction.quantity= instance.quantity
                 my_transaction.save()
-
-class OpcPurchase(models.Model):
-    purchase= models.OneToOneField(Purchase , related_name= "opc_purchase",on_delete=models.CASCADE)
-    quantity= models.IntegerField()
-    unit_price= models.FloatField()
-    total= models.IntegerField()
-
-
-
 
 
 def get_cur_balance(customer):
@@ -299,6 +316,7 @@ class Commission(models.Model):
     date= models.DateField(auto_now_add=True)
     amount= models.IntegerField()
     unit_amount= models.FloatField()
+    note= models.CharField(max_length=250)
 
 @receiver(post_save, sender=Commission)
 def commission_transaction_update(sender, instance, created, **kwargs):
@@ -308,6 +326,7 @@ def commission_transaction_update(sender, instance, created, **kwargs):
         my_transaction.amount= instance.amount
         cur= get_my_cur_balance()
         my_transaction.current_balance= int(cur) + int(instance.amount)
+        my_transaction.description= instance.note
         my_transaction.save()
 
 class Revenue(models.Model):

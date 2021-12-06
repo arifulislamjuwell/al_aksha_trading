@@ -11,12 +11,23 @@
                 <div class="card-body">
                     <form>
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                               
                                 <input value="{{ request.GET.customer }}" name="customer" placeholder="Name, Phone Number" type="text" class="form-control"/>
                             </div>
+                                                        <div class="col-md-3">
+                              
+                                                 <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="far fa-calendar-alt"></i>
+                      </span>
+                    </div>
+                    <input  name="range" type="text" class="form-control float-right" id="reservation">
+                  </div>
+                            </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select name="area" class="form-control">
                                     <option disabled selected>Select Area</option>
                                     {% for a in area %}
@@ -24,7 +35,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                             
                                 <select name="type" class="form-control">
                                     <option value="">Select Type</option>
@@ -33,6 +44,7 @@
 
                                 </select>
                             </div>
+                            
                             <div class="col-md-2">
                            
                                 <button class="btn btn-block btn-secondary">Filter</button>
@@ -176,6 +188,15 @@
 
 {% block script %}
 
+<script>
+  $('#reservation').daterangepicker({
+         
+      locale: {
+           format: 'YYYY-MM-DD'
+          }})
 
+$('#reservation').val("{{ request.GET.range }}")
+
+</script>
 
 {% endblock %}
