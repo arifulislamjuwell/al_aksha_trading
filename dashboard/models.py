@@ -69,7 +69,7 @@ def update_my_transaction(sender, instance, created, **kwargs):
             description= 'OPC50KG(BAG)'
         else:
             stock.pcc += instance.quantity
-            description= 'OPC50KG(BAG)'
+            description= 'PCC50KG(BAG)'
         stock.save()
         total_amount= instance.sub_total
         paid_amount= 0
@@ -81,6 +81,17 @@ def update_my_transaction(sender, instance, created, **kwargs):
         if my_transaction:
             if my_transaction.current_balance != 0:
                 if paid_amount == 0:
+                    if my_transaction.current_balance ==  total_amount:
+                        my_transaction= MyTransaction()
+                        my_transaction.transaction_type = BUY
+                        my_transaction.amount= total_amount
+                        cur= get_my_cur_balance()
+                        my_transaction.save()
+                        my_transaction.current_balance = int(cur) + (-total_amount)
+                        my_transaction.description= description
+                        my_transaction.quantity= instance.quantity
+                        my_transaction.save()
+                        
                     if my_transaction.current_balance > total_amount or (my_transaction.current_balance < total_amount):
                         my_transaction= MyTransaction()
                         my_transaction.transaction_type = BUY
@@ -112,12 +123,9 @@ def update_my_transaction(sender, instance, created, **kwargs):
                 my_transaction= MyTransaction()
                 my_transaction.transaction_type = BUY
                 my_transaction.amount= total_amount
-                cur= get_my_cur_balance()
-                my_transaction.save()
-                my_transaction.current_balance = int(cur) + (-total_amount)
+                my_transaction.current_balance = 0
                 my_transaction.description= description
                 my_transaction.quantity= instance.quantity
-
                 my_transaction.save()
 
             if paid_amount != 0:
@@ -184,6 +192,9 @@ class CustomerTransaction(models.Model):
     amount= models.IntegerField()
     current_balance= models.IntegerField(default=0)
     created_at= models.DateTimeField(auto_now_add=True)
+    quantity= models.IntegerField(blank= True, null=True)
+    description= models.TextField(null=True)
+
 
 
 class Sell(models.Model):
@@ -200,13 +211,13 @@ class Sell(models.Model):
 def update_transaction(sender, instance, created, **kwargs):
     if created:
         stock= Stock.objects.first()
-
         if instance.cement_type == OPC:
             stock.opc -= instance.quantity
-
+            description= 'OPC50KG(BAG)'
         else:
             stock.pcc -= instance.quantity
-            stock.save()
+            description= 'OPC50KG(BAG)'
+        stock.save()
  
         total_amount= instance.total_bill
         paid_amount= instance.paid_amount
@@ -218,11 +229,25 @@ def update_transaction(sender, instance, created, **kwargs):
         if customer_transaction:
             if customer_transaction.current_balance != 0:
                 if paid_amount == 0:
+                    if customer_transaction.current_balance == total_amount:
+                        customer_t= CustomerTransaction()
+                        customer_t.customer=  instance.customer
+                        customer_t.transaction_type = BUY
+                        customer_t.amount= total_amount
+                        customer_t.quantity= instance.quantity
+                        customer_t.description= description
+                        cur= get_cur_balance(instance.customer)
+                        customer_t.save()
+                        customer_t.current_balance = int(cur) + (-total_amount)
+                        customer_t.save()
+
                     if customer_transaction.current_balance > total_amount or (customer_transaction.current_balance < total_amount):
                         customer_t= CustomerTransaction()
                         customer_t.customer=  instance.customer
                         customer_t.transaction_type = BUY
                         customer_t.amount= total_amount
+                        customer_t.quantity= instance.quantity
+                        customer_t.description= description
                         cur= get_cur_balance(instance.customer)
                         customer_t.save()
                         customer_t.current_balance = int(cur) + (-total_amount)
@@ -237,6 +262,9 @@ def update_transaction(sender, instance, created, **kwargs):
                     customer_t.customer=  instance.customer
                     customer_t.transaction_type = BUY
                     customer_t.amount= total_amount
+                    customer_t.quantity= instance.quantity
+                    customer_t.description= description
+
                     cur= get_cur_balance(instance.customer)
                     customer_t.save()
                     customer_t.current_balance = int(cur) + (-total_amount)
@@ -248,9 +276,9 @@ def update_transaction(sender, instance, created, **kwargs):
                 customer_t.customer=  instance.customer
                 customer_t.transaction_type = BUY
                 customer_t.amount= total_amount
-                cur= get_cur_balance(instance.customer)
-                customer_t.save()
-                customer_t.current_balance = int(cur) + (-total_amount)
+                customer_t.current_balance = 0
+                customer_t.quantity= instance.quantity
+                customer_t.description= description
                 customer_t.save()
 
             if paid_amount != 0:
@@ -264,9 +292,25 @@ def update_transaction(sender, instance, created, **kwargs):
                     customer_t.customer=  instance.customer
                     customer_t.transaction_type = BUY
                     customer_t.amount= total_amount
-
+                    customer_t.quantity= instance.quantity
+                    customer_t.description= description
                     cur= get_cur_balance(instance.customer)
+                    customer_t.save()
+                    customer_t.current_balance = int(cur) + (-int(total_amount))
+                    customer_t.save()
+                else:
+                    deposite= Deposite()
+                    deposite.amount = paid_amount
+                    deposite.customer= instance.customer
+                    deposite.save()
 
+                    customer_t= CustomerTransaction()
+                    customer_t.customer=  instance.customer
+                    customer_t.transaction_type = BUY
+                    customer_t.amount= total_amount
+                    customer_t.quantity= instance.quantity
+                    customer_t.description= description
+                    cur= get_cur_balance(instance.customer)
                     customer_t.save()
                     customer_t.current_balance = int(cur) + (-int(total_amount))
                     customer_t.save()
@@ -275,7 +319,8 @@ def update_transaction(sender, instance, created, **kwargs):
                 customer_t.customer=  instance.customer
                 customer_t.transaction_type = BUY
                 customer_t.amount= total_amount
-
+                customer_t.quantity= instance.quantity
+                customer_t.description= description
                 cur= get_cur_balance(instance.customer)
 
                 customer_t.save()

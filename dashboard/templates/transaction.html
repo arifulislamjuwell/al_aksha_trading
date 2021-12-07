@@ -50,21 +50,30 @@
  
                             <tr>
                                 <th>ID</th>
-                                <th>Name </th>
-                                <th>Mobile Number</th>
-                                <th>Transaction Type</th>
                                 <th>Date</th>
+
+                                <th>Name </th>
+             
+                                <th>Transaction Type</th>
+                                <th>Quantity</th>
+                                <th>Details</th>
+
                                 <th> Amount</th>
+
                                 <th>Current Balance</th>
 
                             </tr>
                             {% for trans in transaction %}
                             <tr id="{{ trans.id }}">
+
                                 <td>{{ trans.id }} </td>
-                                <td>{{ trans.customer.name }} </td>
-                                <td >{{ trans.customer.phone_number }}</td>
-                                <td >{{ trans.get_transaction_type_display }}</td>
                                 <td >{{ trans.created_at }}</td>
+
+                                <td>{{ trans.customer.name }} </td>
+                                
+                                <td >{{ trans.get_transaction_type_display }}</td>
+                                <td >{% if trans.quantity %}{{ trans.quantity }}{% else %} {% endif %}</td>
+                                <td >{{ trans.description }}</td>
                                 <td >{{ trans.amount }}</td>
                                 <td >{{ trans.current_balance }}</td>
                             </tr>

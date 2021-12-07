@@ -63,13 +63,13 @@ class CommissionView(View):
         date= data.get('date')
         unit=  data.get('unit')
         note=  data.get('note')
-
-        exist= Commission.objects.filter(date__month= date.split('-')[1])
-        if exist.exists():
-            return redirect('dashboard:commission_url')
-        else:
-            commission_obj=  Commission()
-            commission_obj.date= date
+        print(data,'-------------------------------')
+        # exist= Commission.objects.filter(date__month= date.split('-')[1])
+        # if exist.exists():
+        #     return redirect('dashboard:commission_url')
+        # else:
+        commission_obj=  Commission()
+        commission_obj.date= date
         commission_obj.amount= int(total)
         commission_obj.unit_amount= float(unit)
         commission_obj.note= note
@@ -80,7 +80,7 @@ class CommissionView(View):
 class MyTransactionView(View):
 
     def get(self, request):
-        my_transaction= MyTransaction.objects.all().order_by('-id')
+        my_transaction= MyTransaction.objects.all()
 
         context= {
             'my_transaction': my_transaction
