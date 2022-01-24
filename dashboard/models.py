@@ -208,125 +208,125 @@ class Sell(models.Model):
     created_at= models.DateField( auto_now_add=True)
 
 
-@receiver(post_save, sender=Sell)
-def update_transaction(sender, instance, created, **kwargs):
-    if created:
-        stock= Stock.objects.first()
-        if instance.cement_type == OPC:
-            stock.opc -= instance.quantity
-            description= 'OPC50KG(BAG)'
-        else:
-            stock.pcc -= instance.quantity
-            description= 'OPC50KG(BAG)'
-        stock.save()
+# @receiver(post_save, sender=Sell)
+# def update_transaction(sender, instance, created, **kwargs):
+#     if created:
+#         stock= Stock.objects.first()
+#         if instance.cement_type == OPC:
+#             stock.opc -= instance.quantity
+#             description= 'OPC50KG(BAG)'
+#         else:
+#             stock.pcc -= instance.quantity
+#             description= 'OPC50KG(BAG)'
+#         stock.save()
  
-        total_amount= instance.total_bill
-        paid_amount= instance.paid_amount
-        try:
-            customer_transaction= CustomerTransaction.objects.filter(customer= instance.customer).order_by('-created_at')[0]
-        except:
-            customer_transaction= None
+#         total_amount= instance.total_bill
+#         paid_amount= instance.paid_amount
+#         try:
+#             customer_transaction= CustomerTransaction.objects.filter(customer= instance.customer).order_by('-created_at')[0]
+#         except:
+#             customer_transaction= None
 
-        if customer_transaction:
-            if customer_transaction.current_balance != 0:
-                if paid_amount == 0:
-                    if customer_transaction.current_balance == total_amount:
-                        customer_t= CustomerTransaction()
-                        customer_t.customer=  instance.customer
-                        customer_t.transaction_type = BUY
-                        customer_t.amount= total_amount
-                        customer_t.quantity= instance.quantity
-                        customer_t.description= description
-                        cur= get_cur_balance(instance.customer)
-                        customer_t.save()
-                        customer_t.current_balance = int(cur) + (-total_amount)
-                        customer_t.save()
+#         if customer_transaction:
+#             if customer_transaction.current_balance != 0:
+#                 if paid_amount == 0:
+#                     if customer_transaction.current_balance == total_amount:
+#                         customer_t= CustomerTransaction()
+#                         customer_t.customer=  instance.customer
+#                         customer_t.transaction_type = BUY
+#                         customer_t.amount= total_amount
+#                         customer_t.quantity= instance.quantity
+#                         customer_t.description= description
+#                         cur= get_cur_balance(instance.customer)
+#                         customer_t.save()
+#                         customer_t.current_balance = int(cur) + (-total_amount)
+#                         customer_t.save()
 
-                    if customer_transaction.current_balance > total_amount or (customer_transaction.current_balance < total_amount):
-                        customer_t= CustomerTransaction()
-                        customer_t.customer=  instance.customer
-                        customer_t.transaction_type = BUY
-                        customer_t.amount= total_amount
-                        customer_t.quantity= instance.quantity
-                        customer_t.description= description
-                        cur= get_cur_balance(instance.customer)
-                        customer_t.save()
-                        customer_t.current_balance = int(cur) + (-total_amount)
-                        customer_t.save()
-                else:
-                    deposite= Deposite()
-                    deposite.amount = paid_amount
-                    deposite.customer= instance.customer
-                    deposite.save()
+#                     if customer_transaction.current_balance > total_amount or (customer_transaction.current_balance < total_amount):
+#                         customer_t= CustomerTransaction()
+#                         customer_t.customer=  instance.customer
+#                         customer_t.transaction_type = BUY
+#                         customer_t.amount= total_amount
+#                         customer_t.quantity= instance.quantity
+#                         customer_t.description= description
+#                         cur= get_cur_balance(instance.customer)
+#                         customer_t.save()
+#                         customer_t.current_balance = int(cur) + (-total_amount)
+#                         customer_t.save()
+#                 else:
+#                     deposite= Deposite()
+#                     deposite.amount = paid_amount
+#                     deposite.customer= instance.customer
+#                     deposite.save()
 
-                    customer_t= CustomerTransaction()
-                    customer_t.customer=  instance.customer
-                    customer_t.transaction_type = BUY
-                    customer_t.amount= total_amount
-                    customer_t.quantity= instance.quantity
-                    customer_t.description= description
+#                     customer_t= CustomerTransaction()
+#                     customer_t.customer=  instance.customer
+#                     customer_t.transaction_type = BUY
+#                     customer_t.amount= total_amount
+#                     customer_t.quantity= instance.quantity
+#                     customer_t.description= description
 
-                    cur= get_cur_balance(instance.customer)
-                    customer_t.save()
-                    customer_t.current_balance = int(cur) + (-total_amount)
-                    customer_t.save()
+#                     cur= get_cur_balance(instance.customer)
+#                     customer_t.save()
+#                     customer_t.current_balance = int(cur) + (-total_amount)
+#                     customer_t.save()
                 
-        else:
-            if total_amount == paid_amount:
-                customer_t= CustomerTransaction()
-                customer_t.customer=  instance.customer
-                customer_t.transaction_type = BUY
-                customer_t.amount= total_amount
-                customer_t.current_balance = 0
-                customer_t.quantity= instance.quantity
-                customer_t.description= description
-                customer_t.save()
+#         else:
+#             if total_amount == paid_amount:
+#                 customer_t= CustomerTransaction()
+#                 customer_t.customer=  instance.customer
+#                 customer_t.transaction_type = BUY
+#                 customer_t.amount= total_amount
+#                 customer_t.current_balance = 0
+#                 customer_t.quantity= instance.quantity
+#                 customer_t.description= description
+#                 customer_t.save()
 
-            if paid_amount != 0:
-                if total_amount > paid_amount:
-                    deposite= Deposite()
-                    deposite.amount = paid_amount
-                    deposite.customer= instance.customer
-                    deposite.save()
+#             if paid_amount != 0:
+#                 if total_amount > paid_amount:
+#                     deposite= Deposite()
+#                     deposite.amount = paid_amount
+#                     deposite.customer= instance.customer
+#                     deposite.save()
 
-                    customer_t= CustomerTransaction()
-                    customer_t.customer=  instance.customer
-                    customer_t.transaction_type = BUY
-                    customer_t.amount= total_amount
-                    customer_t.quantity= instance.quantity
-                    customer_t.description= description
-                    cur= get_cur_balance(instance.customer)
-                    customer_t.save()
-                    customer_t.current_balance = int(cur) + (-int(total_amount))
-                    customer_t.save()
-                else:
-                    deposite= Deposite()
-                    deposite.amount = paid_amount
-                    deposite.customer= instance.customer
-                    deposite.save()
+#                     customer_t= CustomerTransaction()
+#                     customer_t.customer=  instance.customer
+#                     customer_t.transaction_type = BUY
+#                     customer_t.amount= total_amount
+#                     customer_t.quantity= instance.quantity
+#                     customer_t.description= description
+#                     cur= get_cur_balance(instance.customer)
+#                     customer_t.save()
+#                     customer_t.current_balance = int(cur) + (-int(total_amount))
+#                     customer_t.save()
+#                 else:
+#                     deposite= Deposite()
+#                     deposite.amount = paid_amount
+#                     deposite.customer= instance.customer
+#                     deposite.save()
 
-                    customer_t= CustomerTransaction()
-                    customer_t.customer=  instance.customer
-                    customer_t.transaction_type = BUY
-                    customer_t.amount= total_amount
-                    customer_t.quantity= instance.quantity
-                    customer_t.description= description
-                    cur= get_cur_balance(instance.customer)
-                    customer_t.save()
-                    customer_t.current_balance = int(cur) + (-int(total_amount))
-                    customer_t.save()
-            else:
-                customer_t= CustomerTransaction()
-                customer_t.customer=  instance.customer
-                customer_t.transaction_type = BUY
-                customer_t.amount= total_amount
-                customer_t.quantity= instance.quantity
-                customer_t.description= description
-                cur= get_cur_balance(instance.customer)
+#                     customer_t= CustomerTransaction()
+#                     customer_t.customer=  instance.customer
+#                     customer_t.transaction_type = BUY
+#                     customer_t.amount= total_amount
+#                     customer_t.quantity= instance.quantity
+#                     customer_t.description= description
+#                     cur= get_cur_balance(instance.customer)
+#                     customer_t.save()
+#                     customer_t.current_balance = int(cur) + (-int(total_amount))
+#                     customer_t.save()
+#             else:
+#                 customer_t= CustomerTransaction()
+#                 customer_t.customer=  instance.customer
+#                 customer_t.transaction_type = BUY
+#                 customer_t.amount= total_amount
+#                 customer_t.quantity= instance.quantity
+#                 customer_t.description= description
+#                 cur= get_cur_balance(instance.customer)
 
-                customer_t.save()
-                customer_t.current_balance = int(cur) + (-int(total_amount))
-                customer_t.save()
+#                 customer_t.save()
+#                 customer_t.current_balance = int(cur) + (-int(total_amount))
+#                 customer_t.save()
 
 
 class Deposite(models.Model):

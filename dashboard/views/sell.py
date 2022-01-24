@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from dashboard.models import Area, Customer, Sell
+from dashboard.models import Area, Customer, CustomerTransaction, Deposite, OPC, Sell, Stock, get_cur_balance, BUY
 from django.contrib.auth.models import User
 import logging
 from django.db.models import Q
@@ -68,7 +68,6 @@ class CreateSellView(LoginRequiredMixin , View):
         unit_price= data.get('unit_price')
         total=  data.get('total')
         paid=  data.get('paid')
-        print(data)
 
         sell= Sell()
         sell.paid_amount= int(paid)
@@ -80,5 +79,125 @@ class CreateSellView(LoginRequiredMixin , View):
         sell.total_bill = int(total)
         sell.unit_price =  float(unit_price)
         sell.save()
+
+
+        stock= Stock.objects.first()
+        if sell.cement_type == OPC:
+            stock.opc -= sell.quantity
+            description= 'OPC50KG(BAG)'
+        else:
+            stock.pcc -= sell.quantity
+            description= 'OPC50KG(BAG)'
+        stock.save()
+ 
+        total_amount= sell.total_bill
+        paid_amount= sell.paid_amount
+        try:
+            customer_transaction= CustomerTransaction.objects.filter(customer= sell.customer).order_by('-created_at')[0]
+        except:
+            customer_transaction= None
+
+        if customer_transaction:
+            if customer_transaction.current_balance != 0:
+                if paid_amount == 0:
+                    if customer_transaction.current_balance == total_amount:
+                        customer_t= CustomerTransaction()
+                        customer_t.customer=  sell.customer
+                        customer_t.transaction_type = BUY
+                        customer_t.amount= total_amount
+                        customer_t.quantity= sell.quantity
+                        customer_t.description= description
+                        cur= get_cur_balance(sell.customer)
+                        customer_t.save()
+                        customer_t.current_balance = int(cur) + (-total_amount)
+                        customer_t.save()
+
+                    if customer_transaction.current_balance > total_amount or (customer_transaction.current_balance < total_amount):
+                        customer_t= CustomerTransaction()
+                        customer_t.customer=  sell.customer
+                        customer_t.transaction_type = BUY
+                        customer_t.amount= total_amount
+                        customer_t.quantity= sell.quantity
+                        customer_t.description= description
+                        cur= get_cur_balance(sell.customer)
+                        customer_t.save()
+                        customer_t.current_balance = int(cur) + (-total_amount)
+                        customer_t.save()
+                else:
+                    deposite= Deposite()
+                    deposite.amount = paid_amount
+                    deposite.customer= sell.customer
+                    deposite.save()
+
+                    customer_t= CustomerTransaction()
+                    customer_t.customer=  sell.customer
+                    customer_t.transaction_type = BUY
+                    customer_t.amount= total_amount
+                    customer_t.quantity= sell.quantity
+                    customer_t.description= description
+
+                    cur= get_cur_balance(sell.customer)
+                    customer_t.save()
+                    customer_t.current_balance = int(cur) + (-total_amount)
+                    customer_t.save()
+                
+        else:
+            if total_amount == paid_amount:
+                customer_t= CustomerTransaction()
+                customer_t.customer=  sell.customer
+                customer_t.transaction_type = BUY
+                customer_t.amount= total_amount
+                customer_t.current_balance = 0
+                customer_t.quantity= sell.quantity
+                customer_t.description= description
+                customer_t.save()
+
+            if paid_amount != 0:
+                if total_amount > paid_amount:
+                    deposite= Deposite()
+                    deposite.amount = paid_amount
+                    deposite.customer= sell.customer
+                    deposite.save()
+
+                    customer_t= CustomerTransaction()
+                    customer_t.customer=  sell.customer
+                    customer_t.transaction_type = BUY
+                    customer_t.amount= total_amount
+                    customer_t.quantity= sell.quantity
+                    customer_t.description= description
+                    cur= get_cur_balance(sell.customer)
+                    customer_t.save()
+                    customer_t.current_balance = int(cur) + (-int(total_amount))
+                    customer_t.save()
+                else:
+                    deposite= Deposite()
+                    deposite.amount = paid_amount
+                    deposite.customer= sell.customer
+                    deposite.save()
+
+                    customer_t= CustomerTransaction()
+                    customer_t.customer=  sell.customer
+                    customer_t.transaction_type = BUY
+                    customer_t.amount= total_amount
+                    customer_t.quantity= sell.quantity
+                    customer_t.description= description
+                    cur= get_cur_balance(sell.customer)
+                    customer_t.save()
+                    customer_t.current_balance = int(cur) + (-int(total_amount))
+                    customer_t.save()
+            else:
+                customer_t= CustomerTransaction()
+                customer_t.customer=  sell.customer
+                customer_t.transaction_type = BUY
+                customer_t.amount= total_amount
+                customer_t.quantity= sell.quantity
+                customer_t.description= description
+                cur= get_cur_balance(sell.customer)
+
+                customer_t.save()
+                customer_t.current_balance = int(cur) + (-int(total_amount))
+                customer_t.save()
+
+
 
         return redirect('dashboard:sell_url')
