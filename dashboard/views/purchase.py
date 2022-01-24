@@ -5,10 +5,11 @@ from dashboard.models import Area, Commission, Customer, MyDeposite, MyTransacti
 from django.contrib.auth.models import User
 import logging
 from django.db.models import Q
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 logger = logging.getLogger('tutul_traders')
 
-class PurchaseView(View):
+class PurchaseView(LoginRequiredMixin, View):
 
     def get(self, request):
         data= request.GET
@@ -20,7 +21,7 @@ class PurchaseView(View):
         return render(request, 'purchase.html', context)
 
     
-class CreatePurchaseView(View):
+class CreatePurchaseView(LoginRequiredMixin, View):
 
     def get(self, request):
         return render(request, 'create_purchase.html')
@@ -44,7 +45,7 @@ class CreatePurchaseView(View):
 
         return redirect('dashboard:purchase_url')
 
-class CommissionView(View):
+class CommissionView(LoginRequiredMixin, View):
 
     def get(self, request):
         data= request.GET
@@ -77,7 +78,7 @@ class CommissionView(View):
         return redirect('dashboard:commission_url')
 
 
-class MyTransactionView(View):
+class MyTransactionView(LoginRequiredMixin, View):
 
     def get(self, request):
         my_transaction= MyTransaction.objects.all()
@@ -89,7 +90,7 @@ class MyTransactionView(View):
 
 
 
-class MyDepositeView(View):
+class MyDepositeView(LoginRequiredMixin, View):
 
     def get(self, request):
         data= request.GET

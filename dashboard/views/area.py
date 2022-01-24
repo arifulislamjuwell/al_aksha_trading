@@ -6,10 +6,10 @@ from django.contrib import auth
 from django.contrib.auth.models import User
 import logging
 from dashboard.models import Area
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 logger = logging.getLogger('tutul_traders')
 
-class AreaView(View):
+class AreaView(LoginRequiredMixin, View):
 
     def get(self, request):
         data= request.GET

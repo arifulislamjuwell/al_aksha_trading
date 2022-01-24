@@ -8,22 +8,23 @@ import logging
 from dashboard.models import Commission, Customer, Revenue, Sell, Stock, OPC, PCC
 from django.db.models import Sum
 from datetime import datetime
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-class DashboardView(View):
+class DashboardView(LoginRequiredMixin, View):
 
     def get(self, request):
         stock= Stock.objects.first()
         return render(request, 'dashboard.html', {'stock': stock}) 
 
-class RevenueView(View):
+class RevenueView(LoginRequiredMixin, View):
 
     def get(self, request):
         customer= Customer.objects.all().order_by('-id')
         revenue= Revenue.objects.all().order_by('-id')
         return render(request, 'revenue.html',{'revenue': revenue, 'customer': customer})
 
-class GenerateRevenueView(View):
+class GenerateRevenueView(LoginRequiredMixin, View):
     def post(self, request):
         month_data= request.POST.get('month')
         pcc= request.POST.get('pcc')

@@ -7,8 +7,9 @@ import logging
 from django.db.models import Q
 
 logger = logging.getLogger('tutul_traders')
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-class CustomerView(View):
+class CustomerView(LoginRequiredMixin, View):
 
     def get(self, request):
         data= request.GET

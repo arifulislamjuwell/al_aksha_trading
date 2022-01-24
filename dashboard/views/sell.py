@@ -6,10 +6,11 @@ from django.contrib.auth.models import User
 import logging
 from django.db.models import Q
 from django.db.models import Sum
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 logger = logging.getLogger('tutul_traders')
 
-class SellView(View):
+class SellView(LoginRequiredMixin, View):
 
     def get(self, request):
         data= request.GET
@@ -48,7 +49,7 @@ class SellView(View):
         return render(request, 'sell_list.html', context)
 
     
-class CreateSellView(View):
+class CreateSellView(LoginRequiredMixin , View):
 
     def get(self, request):
         customer= Customer.objects.all().order_by('-id')

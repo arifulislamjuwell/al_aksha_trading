@@ -207,6 +207,7 @@ class Sell(models.Model):
     paid_amount= models.IntegerField(default= 0)
     created_at= models.DateField( auto_now_add=True)
 
+
 @receiver(post_save, sender=Sell)
 def update_transaction(sender, instance, created, **kwargs):
     if created:

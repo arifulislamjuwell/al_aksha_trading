@@ -7,11 +7,12 @@ from django.contrib.auth.models import User
 import logging
 from dashboard.models import Area, Customer, CustomerTransaction, Deposite
 from django.db.models import Q
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 logger = logging.getLogger('tutul_traders')
 
-class DepositeView(View):
+class DepositeView(LoginRequiredMixin, View):
 
     def get(self, request):
         data= request.GET
@@ -43,7 +44,7 @@ class DepositeView(View):
         return redirect('dashboard:deposite_url')
 
     
-class TransactionView(View):
+class TransactionView(LoginRequiredMixin, View):
     def get(self, request, id):
         data= request.GET
 
