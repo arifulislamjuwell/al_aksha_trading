@@ -185,6 +185,8 @@ class Customer(models.Model):
     email= models.CharField(max_length=50)
     area= models.ForeignKey(Area, related_name="customers", on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.name
 
 class CustomerTransaction(models.Model):
     customer= models.ForeignKey(Customer,related_name='transaction', on_delete=models.CASCADE)
