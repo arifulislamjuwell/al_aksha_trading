@@ -72,7 +72,7 @@ class CreateSellView(LoginRequiredMixin , View):
         sell= Sell()
         sell.paid_amount= int(paid)
         sell.customer_id= customer
-        sell.cement_type= type_
+        sell.cement_type= int(type_)
         if address:
             sell.delivery_address= address
         sell.quantity= int(quantity)
