@@ -195,7 +195,8 @@ class CustomerTransaction(models.Model):
     quantity= models.IntegerField(blank= True, null=True)
     description= models.TextField(null=True)
 
-
+    def __str__(self):
+        return self.customer.name + 'id:-'+ str(self.id)
 
 class Sell(models.Model):
     customer= models.ForeignKey(Customer,related_name="sells", on_delete=models.CASCADE)
