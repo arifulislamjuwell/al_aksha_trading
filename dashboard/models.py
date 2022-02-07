@@ -188,6 +188,11 @@ class Customer(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def current_balance(self):
+        return str(self.transaction.all().order_by('-id').first().current_balance)  if self.transaction.all().exists() else 'No'
+
+
 class CustomerTransaction(models.Model):
     customer= models.ForeignKey(Customer,related_name='transaction', on_delete=models.CASCADE)
     transaction_type= models.PositiveSmallIntegerField(choices= TRANSACTION_TYPE)

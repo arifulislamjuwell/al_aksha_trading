@@ -61,6 +61,7 @@
                                 <th>Email</th>
                                 <th>Area</th>
                                 <th>Address</th>
+                                <th>Balance</th>
                                 <th>Transaction</th>
 
                             </tr>
@@ -72,6 +73,8 @@
                                 <td >{{ cus.email }}</td>
                                 <td >{{ cus.area.name }}</td>
                                 <td >{{ cus.address }}</td>
+                                <td >{{ cus.current_balance }}</td>
+
                                 <td >
                                     <a href="{% url 'dashboard:transaction_url' cus.id %}">
                                     <button class="btn btn-primary">Show Transaction</button><a>
