@@ -87,7 +87,7 @@ class CreateSellView(LoginRequiredMixin , View):
             description= 'OPC50KG(BAG)'
         else:
             stock.pcc -= sell.quantity
-            description= 'OPC50KG(BAG)'
+            description= 'PCC50KG(BAG)'
         stock.save()
  
         total_amount= sell.total_bill
