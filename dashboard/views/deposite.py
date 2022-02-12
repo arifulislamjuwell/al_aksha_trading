@@ -47,11 +47,12 @@ class DepositeView(LoginRequiredMixin, View):
 class TransactionView(LoginRequiredMixin, View):
     def get(self, request, id):
         data= request.GET
-
-        transaction= CustomerTransaction.objects.filter(customer__id= id).order_by('-id')
+        customer= Customer.objects.get(id= id)
+        transaction= CustomerTransaction.objects.filter(customer= customer).order_by('-id')
 
         context={
             'transaction': transaction,
+            'customer': customer
           
         }
         return render( request, 'transaction.html', context)

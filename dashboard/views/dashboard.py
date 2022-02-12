@@ -9,7 +9,7 @@ from dashboard.models import Commission, Customer, Revenue, Sell, Stock, OPC, PC
 from django.db.models import Sum
 from datetime import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.http import JsonResponse
 
 class DashboardView(LoginRequiredMixin, View):
 
@@ -71,3 +71,15 @@ class GenerateRevenueView(LoginRequiredMixin, View):
             else:
                 rev_object.save()
         return redirect('dashboard:revenue_url')
+
+class RemoveView(View):
+
+    def get(self, request):
+        data= request.GET
+        print(data)
+        sector= data.get('sector')
+        id_= data.get('id')
+        if sector == '1':
+            model= Sell
+        model.objects.get(id= id_).delete()
+        return JsonResponse({'id': id_})

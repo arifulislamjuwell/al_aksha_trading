@@ -1,6 +1,7 @@
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
+from django.db.models import F
 
 
 OPC= 1
@@ -188,160 +189,133 @@ class Customer(models.Model):
     def __str__(self):
         return self.name
 
-    @property
-    def current_balance(self):
-        return str(self.transaction.all().order_by('-id').first().current_balance)  if self.transaction.all().exists() else 'No'
-
 
 class CustomerTransaction(models.Model):
     customer= models.ForeignKey(Customer,related_name='transaction', on_delete=models.CASCADE)
     transaction_type= models.PositiveSmallIntegerField(choices= TRANSACTION_TYPE)
-    amount= models.IntegerField()
-    current_balance= models.IntegerField(default=0)
+    bill= models.IntegerField(default=0)
+    paid= models.IntegerField(default=0)
     created_at= models.DateTimeField(auto_now_add=True)
     quantity= models.IntegerField(blank= True, null=True)
     description= models.TextField(null=True)
+    sell_dependency_id= models.CharField(max_length=10, null= True)
+    deposit_dependency_id= models.CharField(max_length=10, null= True)
 
     def __str__(self):
         return self.customer.name + 'id:-'+ str(self.id)
+
+def create_transaction(customer, paid, bill, quantity, description, sell_dependency_id= None):
+
+    customer_t = CustomerTransaction()
+    customer_t.customer = customer
+    customer_t.bill= bill
+    customer_t.transaction_type = BUY
+    customer_t.quantity = quantity
+    customer_t.paid = paid
+    customer_t.description= description
+    customer_t.sell_dependency_id= sell_dependency_id
+    customer_t.save()
+
+
+def create_deposit_record(customer, amount, sell_dependency_id= None):
+    Deposite.objects.create(
+        customer=customer,
+        amount=amount,
+        sell_dependency_id= sell_dependency_id
+    )
+
+class CustomerBalance(models.Model):
+    customer = models.OneToOneField(
+        Customer, on_delete=models.CASCADE, related_name='balance')
+    total_purchase_amount = models.IntegerField(default=0)
+    total_paid_amount = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f'{self.customer} | Purchase: {self.total_purchase_amount}, Paid: {self.total_paid_amount}'
+
+    @property
+    def due_amount(self):
+        return self.total_paid_amount - self.total_purchase_amount
+    
+    @property
+    def current_balance(self):
+        # return self.total_purchase_amount - self.total_paid_amount
+        return self.total_paid_amount - self.total_purchase_amount
+
+@receiver(post_save, sender=CustomerTransaction)
+def update_customer_balance(sender, instance, created, **kwargs):
+    if created:
+        balance, created= CustomerBalance.objects.get_or_create(customer= instance.customer)
+        balance.total_purchase_amount = F('total_purchase_amount') + instance.bill
+        balance.total_paid_amount= F('total_paid_amount') + instance.paid
+        balance.save()
+
+@receiver(pre_delete, sender=CustomerTransaction)
+def back_previous_transaction_remove(sender, instance, using, **kwargs):
+    balance, created= CustomerBalance.objects.get_or_create(customer= instance.customer)
+    balance.total_purchase_amount = F('total_purchase_amount') - instance.bill
+    balance.total_paid_amount= F('total_paid_amount') - instance.paid
+    balance.save()
 
 class Sell(models.Model):
     customer= models.ForeignKey(Customer,related_name="sells", on_delete=models.CASCADE)
     cement_type= models.PositiveSmallIntegerField(choices= CEMENT_TYPE)
     quantity= models.IntegerField()
     unit_price = models.FloatField()
-    delivery_address= models.TextField(null=True)
     total_bill= models.IntegerField(default= 0)
     paid_amount= models.IntegerField(default= 0)
     created_at= models.DateField( auto_now_add=True)
 
+@receiver(pre_delete, sender=Sell)
+def back_previous_sell_remove(sender, instance, using, **kwargs):
+    stock= Stock.objects.first()
+    if instance.cement_type == OPC:
+        stock.opc += instance.quantity
+    else:
+        stock.pcc += instance.quantity
+    stock.save()
+    sell_id= str(instance.id)
+    CustomerTransaction.objects.filter(sell_dependency_id = sell_id).delete()
+    Deposite.objects.filter(sell_dependency_id = sell_id).delete()
 
-# @receiver(post_save, sender=Sell)
-# def update_transaction(sender, instance, created, **kwargs):
-#     if created:
-#         stock= Stock.objects.first()
-#         if instance.cement_type == OPC:
-#             stock.opc -= instance.quantity
-#             description= 'OPC50KG(BAG)'
-#         else:
-#             stock.pcc -= instance.quantity
-#             description= 'OPC50KG(BAG)'
-#         stock.save()
- 
-#         total_amount= instance.total_bill
-#         paid_amount= instance.paid_amount
-#         try:
-#             customer_transaction= CustomerTransaction.objects.filter(customer= instance.customer).order_by('-created_at')[0]
-#         except:
-#             customer_transaction= None
 
-#         if customer_transaction:
-#             if customer_transaction.current_balance != 0:
-#                 if paid_amount == 0:
-#                     if customer_transaction.current_balance == total_amount:
-#                         customer_t= CustomerTransaction()
-#                         customer_t.customer=  instance.customer
-#                         customer_t.transaction_type = BUY
-#                         customer_t.amount= total_amount
-#                         customer_t.quantity= instance.quantity
-#                         customer_t.description= description
-#                         cur= get_cur_balance(instance.customer)
-#                         customer_t.save()
-#                         customer_t.current_balance = int(cur) + (-total_amount)
-#                         customer_t.save()
+@receiver(post_save, sender=Sell)
+def update_customer_transaction(sender, instance, created, **kwargs):
+    if created:
+        stock= Stock.objects.first()
+        if instance.cement_type == OPC:
+            stock.opc -= instance.quantity
+            description= 'OPC50KG(BAG)'
+        else:
+            stock.pcc -= instance.quantity
+            description= 'PCC50KG(BAG)'
+        stock.save()
 
-#                     if customer_transaction.current_balance > total_amount or (customer_transaction.current_balance < total_amount):
-#                         customer_t= CustomerTransaction()
-#                         customer_t.customer=  instance.customer
-#                         customer_t.transaction_type = BUY
-#                         customer_t.amount= total_amount
-#                         customer_t.quantity= instance.quantity
-#                         customer_t.description= description
-#                         cur= get_cur_balance(instance.customer)
-#                         customer_t.save()
-#                         customer_t.current_balance = int(cur) + (-total_amount)
-#                         customer_t.save()
-#                 else:
-#                     deposite= Deposite()
-#                     deposite.amount = paid_amount
-#                     deposite.customer= instance.customer
-#                     deposite.save()
+        sell_id= instance.id
+        customer = instance.customer
+        final_bill = instance.total_bill
+        paid_amount = instance.paid_amount
 
-#                     customer_t= CustomerTransaction()
-#                     customer_t.customer=  instance.customer
-#                     customer_t.transaction_type = BUY
-#                     customer_t.amount= total_amount
-#                     customer_t.quantity= instance.quantity
-#                     customer_t.description= description
-
-#                     cur= get_cur_balance(instance.customer)
-#                     customer_t.save()
-#                     customer_t.current_balance = int(cur) + (-total_amount)
-#                     customer_t.save()
-                
-#         else:
-#             if total_amount == paid_amount:
-#                 customer_t= CustomerTransaction()
-#                 customer_t.customer=  instance.customer
-#                 customer_t.transaction_type = BUY
-#                 customer_t.amount= total_amount
-#                 customer_t.current_balance = 0
-#                 customer_t.quantity= instance.quantity
-#                 customer_t.description= description
-#                 customer_t.save()
-
-#             if paid_amount != 0:
-#                 if total_amount > paid_amount:
-#                     deposite= Deposite()
-#                     deposite.amount = paid_amount
-#                     deposite.customer= instance.customer
-#                     deposite.save()
-
-#                     customer_t= CustomerTransaction()
-#                     customer_t.customer=  instance.customer
-#                     customer_t.transaction_type = BUY
-#                     customer_t.amount= total_amount
-#                     customer_t.quantity= instance.quantity
-#                     customer_t.description= description
-#                     cur= get_cur_balance(instance.customer)
-#                     customer_t.save()
-#                     customer_t.current_balance = int(cur) + (-int(total_amount))
-#                     customer_t.save()
-#                 else:
-#                     deposite= Deposite()
-#                     deposite.amount = paid_amount
-#                     deposite.customer= instance.customer
-#                     deposite.save()
-
-#                     customer_t= CustomerTransaction()
-#                     customer_t.customer=  instance.customer
-#                     customer_t.transaction_type = BUY
-#                     customer_t.amount= total_amount
-#                     customer_t.quantity= instance.quantity
-#                     customer_t.description= description
-#                     cur= get_cur_balance(instance.customer)
-#                     customer_t.save()
-#                     customer_t.current_balance = int(cur) + (-int(total_amount))
-#                     customer_t.save()
-#             else:
-#                 customer_t= CustomerTransaction()
-#                 customer_t.customer=  instance.customer
-#                 customer_t.transaction_type = BUY
-#                 customer_t.amount= total_amount
-#                 customer_t.quantity= instance.quantity
-#                 customer_t.description= description
-#                 cur= get_cur_balance(instance.customer)
-
-#                 customer_t.save()
-#                 customer_t.current_balance = int(cur) + (-int(total_amount))
-#                 customer_t.save()
+        if paid_amount > final_bill:
+            deposit_amount= paid_amount - final_bill
+            create_transaction(customer=customer, paid=final_bill, bill=final_bill, quantity= instance.quantity, description= description, sell_dependency_id=sell_id)
+            create_deposit_record(customer, deposit_amount, sell_id)
+        else:
+            create_transaction(customer=customer, paid=paid_amount, bill=final_bill, quantity= instance.quantity, description= description, sell_dependency_id=sell_id)
 
 
 class Deposite(models.Model):
     customer= models.ForeignKey(Customer,related_name='deposites', on_delete=models.CASCADE, null=True)
     amount= models.IntegerField()
     created_at= models.DateField( auto_now_add=True)
+    sell_dependency_id= models.CharField(max_length=10, null= True)
 
+
+@receiver(pre_delete, sender=Deposite)
+def back_previous_deposit_remove(sender, instance, using, **kwargs):
+    CustomerTransaction.objeects.filter(deposit_dependency_id = str(instance.id)).delete()
 
 @receiver(post_save, sender=Deposite)
 def update_transaction(sender, instance, created, **kwargs):
@@ -349,9 +323,8 @@ def update_transaction(sender, instance, created, **kwargs):
         customer_t= CustomerTransaction()
         customer_t.customer=  instance.customer
         customer_t.transaction_type = DEPOSITE
-        customer_t.amount= instance.amount
-        cur= get_cur_balance(instance.customer)
-        customer_t.current_balance= int(cur) + int(instance.amount)
+        customer_t.paid= instance.amount
+        customer_t.deposit_dependency_id = instance.id
         customer_t.save()
 
 class Stock(models.Model):

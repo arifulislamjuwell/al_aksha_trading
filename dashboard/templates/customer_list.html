@@ -73,7 +73,7 @@
                                 <td >{{ cus.email }}</td>
                                 <td >{{ cus.area.name }}</td>
                                 <td >{{ cus.address }}</td>
-                                <td >{{ cus.current_balance }}</td>
+                                <td > {{ cus.balance.current_balance }}</td>
 
                                 <td >
                                     <a href="{% url 'dashboard:transaction_url' cus.id %}">
@@ -151,62 +151,7 @@
 {% endblock %}
 
 {% block script %}
-<script>
 
-function seller_details(seller_id){
-
-        var url = "";
-        var data  ={'id': seller_id}
-            $.ajax({
-                url: url,
-                data: data,
-                type: "GET",
-                success: function (data) {
-
-                    $('#full_name').html(data[0].user__full_name)
-                    $('#buisness_name').html(data[0].buisness_name)
-                    $('#email').html(data[0].user__user__username)
-                    $('#mobile').html(data[0].user__phone_number)
-                    $('#p_type').html(data[0].payment_type)
-                    $('#last_login').html(data[0].last_login)
-                    $('#role').html(data[0].user__permission_role__role_title)
-
-                    if (data[0].bank_payment){
-                        $('#wallet_bank').html(data[0].bank_payment.provider)
-                        $('#branch').html(data[0].bank_payment.branch)
-                        $('#holder_name').html(data[0].bank_payment.holder_name)
-                        $('#acc_no').html(data[0].bank_payment.account_number)
-                        $('#a_type').html(data[0].bank_payment.account_type)
-                        $('#routing_no').html(data[0].bank_payment.routing)  
-                    }
-                    if (data[0].mobile_payment){
-                        $('#wallet_mobile').html(data[0].mobile_payment.provider)
-                        $('#mobile_n').html(data[0].mobile_payment.number)
-                    }
-
-                    var append_add_html = '<tr id="add"><th scope="col"> Address </th>'
-                    for (i = 0; i < data[0].address.length; i++) {
-                        append_add_html+='<td id="att_name" class="table-secondary">'+ data[0].address[i].address+' (Primary - '+data[0].address[i].is_primary +')</td>'
-                    }
-                    append_add_html+= '</tr>'
-              
-                    $('#add_table tr:last').after(append_add_html);
-
-
-                    var append_con_html = '<tr id="con"><th scope="col"> Contact Name, Number </th>'
-                    for (i = 0; i < data[0].contact.length; i++) {
-                        append_con_html+='<td id="att_name" class="table-secondary">Name -'+ data[0].contact[i].name+' Number -'+data[0].contact[i].number+' (Primary - '+data[0].contact[i].is_primary +')</td>'
-                    }
-                    append_con_html+= '</tr>'
-              
-                    $('#con_table tr:last').after(append_con_html);
-
-            },
-                error: function (data) {
-            }
-        });
-}
-</script>
 <script>
     function open_confirm_modal(id, sector){
         $("#confirm_sector").val(sector)
@@ -214,47 +159,6 @@ function seller_details(seller_id){
         $("#confirmModal").modal('toggle');
     }
 
-function seller_banner_image_click(id){
-    $('#banner_image'+ id +'').click()
-}
-
-
-function update_and_preview_banner(inputId, previewId, id_){
-            console.log(inputId, previewId, id_)
-            var file = $(inputId).get(0).files[0];
-
-            var name= file.name
-            var ext = name.split('.').pop().toLowerCase();
-            if($.inArray(ext, ['gif','png','jpg','jpeg']) == -1)
-            {
-            return alert("Invalid Image File");
-            }
-
-            var form_data = new FormData();
-            form_data.append("image", file);
-            form_data.append("id", id_);
-            const url = "/update-seller-banner/"
-            $.ajax({
-            url: url,
-            data: form_data,
-            contentType: false,
-            type: "POST",
-            processData: false,
-            success: function (data) {
-            if(file){
-            var reader = new FileReader();
-
-            reader.onload = function(){
-                $(previewId).attr("src", reader.result);
-            }
-
-            reader.readAsDataURL(file);
-            }
-            },
-            error: function (data) {
-            }
-            });
-            }
 </script>
 <script src="{% static 'js/custom/delete_row.js' %}"> </script>
 <script src="{% static 'js/custom/single_status_change.js' %}"> </script>

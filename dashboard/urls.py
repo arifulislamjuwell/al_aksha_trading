@@ -2,7 +2,7 @@
 from django.contrib import admin
 from django.urls import path, include
 
-from dashboard.views.dashboard import DashboardView, RevenueView, GenerateRevenueView
+from dashboard.views.dashboard import DashboardView, RevenueView, GenerateRevenueView, RemoveView
 from dashboard.views.customer import CustomerView
 from dashboard.views.area import AreaView
 from dashboard.views.sell import SellView, CreateSellView
@@ -30,11 +30,7 @@ urlpatterns = [
     path('generate-revenue/', GenerateRevenueView.as_view(), name="generate_revenue_url"),
 
 
-
-
-
-
-
+    path('remove/', RemoveView.as_view(), name="remove_url"),
 
 ]
 

@@ -39,7 +39,7 @@
                     <div class="card-header">
                         <div class="row">
                             <div class="col-md-10">
-                                <h5>Transaction List</h5>
+                                <h5>Transaction List  of {{ customer.name }}</h5>
                             </div>
 
                         </div>
@@ -51,16 +51,13 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Date</th>
-
-                                <th>Name </th>
-             
                                 <th>Transaction Type</th>
                                 <th>Quantity</th>
                                 <th>Details</th>
 
-                                <th> Amount</th>
+                                <th> Bill</th>
 
-                                <th>Current Balance</th>
+                                <th> Paid</th>
 
                             </tr>
                             {% for trans in transaction %}
@@ -68,14 +65,11 @@
 
                                 <td>{{ trans.id }} </td>
                                 <td >{{ trans.created_at }}</td>
-
-                                <td>{{ trans.customer.name }} </td>
-                                
                                 <td >{{ trans.get_transaction_type_display }}</td>
                                 <td >{% if trans.quantity %}{{ trans.quantity }}{% else %} {% endif %}</td>
                                 <td >{{ trans.description }}</td>
-                                <td >{{ trans.amount }}</td>
-                                <td >{{ trans.current_balance }}</td>
+                                <td >{{ trans.bill }}</td>
+                                <td >{{ trans.paid }}</td>
                             </tr>
                             {% endfor %}
                         </table>
