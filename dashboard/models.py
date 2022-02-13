@@ -118,7 +118,7 @@ def update_my_transaction(sender, instance, created, **kwargs):
         if paid_amount > final_bill:
             deposit_amount= paid_amount - final_bill
             create_my_transaction(paid=final_bill, bill=final_bill, quantity= instance.quantity, description= description, purchase_dependency_id=purchase_id)
-            create_deposit_record(deposit_amount, purchase_id)
+            create_my_deposit_record(deposit_amount, instance.created_at, purchase_id)
         else:
             create_my_transaction( paid=paid_amount, bill=final_bill, quantity= instance.quantity, description= description, purchase_dependency_id=purchase_id)
 
@@ -184,17 +184,19 @@ def create_my_transaction( paid, bill, quantity, description, purchase_dependenc
     customer_t.purchase_dependency_id= purchase_dependency_id
     customer_t.save()
 
-def create_deposit_record(customer, amount, sell_dependency_id= None):
+def create_deposit_record(customer, amount, created_at, sell_dependency_id= None):
     Deposite.objects.create(
         customer=customer,
         amount=amount,
-        sell_dependency_id= sell_dependency_id
+        sell_dependency_id= sell_dependency_id,
+        created_at= created_at
     )
 
-def create_my_deposit_record(amount, purchase_dependency_id= None):
+def create_my_deposit_record(amount, created_at, purchase_dependency_id= None):
     MyDeposite.objects.create(
         amount=amount,
-        purchase_dependency_id= purchase_dependency_id
+        purchase_dependency_id= purchase_dependency_id,
+        created_at= created_at
     )
 
 class CustomerBalance(models.Model):
@@ -274,7 +276,7 @@ def update_customer_transaction(sender, instance, created, **kwargs):
         if paid_amount > final_bill:
             deposit_amount= paid_amount - final_bill
             create_transaction(customer=customer, paid=final_bill, bill=final_bill, quantity= instance.quantity, description= description, sell_dependency_id=sell_id)
-            create_deposit_record(customer, deposit_amount, sell_id)
+            create_deposit_record(customer, deposit_amount, instance.created_at, sell_id)
         else:
             create_transaction(customer=customer, paid=paid_amount, bill=final_bill, quantity= instance.quantity, description= description, sell_dependency_id=sell_id)
 
