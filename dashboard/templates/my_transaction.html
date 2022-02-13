@@ -50,26 +50,26 @@
  
                             <tr>
                                 <th>ID</th>
+                                <th>Date</th>
 
                                 <th>Transaction Type</th>
-                                <th>Date</th>
                                 <th>Details</th>
                                 <th>Quantity</th>
-
-                                <th> Amount</th>
-                                <th>Current Balance</th>
+                                <th> Bill</th>
+                                <th> Paid</th>
 
                             </tr>
                             {% for trans in my_transaction %}
                             <tr id="{{ trans.id }}">
                                 <td>{{ trans.id }} </td>
-                                <td >{{ trans.get_transaction_type_display }}</td>
                                 <td >{{ trans.created_at }}</td>
+                                
+                                <td >{{ trans.get_transaction_type_display }}</td>
                                 <td >{{ trans.description }} </td>
                                 <td > {% if trans.quantity %} {{ trans.quantity }} {% else %} {% endif %}</td>
 
-                                <td >{{ trans.amount }}</td>
-                                <td >{{ trans.current_balance }}</td>
+                                <td >{{ trans.bill }}</td>
+                                <td >{{ trans.paid }}</td>
                             </tr>
                             {% endfor %}
                         </table>

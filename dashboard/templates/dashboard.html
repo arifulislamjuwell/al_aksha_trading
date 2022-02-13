@@ -77,8 +77,8 @@
             <div class="widget style1 dashboard-card">
                 <div class="row">
                     <div class="col-8">
-                        <p> Total Instructors </p>
-                        <h2 class="font-bold">{{ total_instructors }}</h2>
+                        <p style="color: black;"> My Balance  </p>
+                        <h2 class="font-bold">{{ balance.current_balance }}</h2>
                     </div>
                 </div>
             </div>
@@ -87,18 +87,15 @@
             <div class="widget style1 dashboard-card">
                 <div class="row">
                     <div class="col-8">
-                        <p>  Sum of Volume (sales) </p>
-                        <h2 class="font-bold"> {% if sum_of_volume %} {{ sum_of_volume }} {% else %} 0 {% endif %} </h2>
+                        <p style="color: black;"> My Due </p>
+                        <h2 class="font-bold"> {{ balance.due_amount }} </h2>
                     </div>
-                    {#                            <div class="col-4">#}
-                    {#                                <i class="fa fa-home fa-5x"></i>#}
-                    {#                            </div>#}
                 </div>
             </div>
 
         </div>
     </div>
-
+{% comment %} 
     <div class="row px-4 pt-0 pb-4">
 
         <div class="col-lg-3">
@@ -138,9 +135,7 @@
         <div class="col-lg-3">
             <div class="widget style1 dashboard-card">
                 <div class="row">
-{#                    <div class="col-4">#}
-{#                        <i class="fa fa-clock-o fa-5x"></i>#}
-{#                    </div>#}
+
                     <div class="col-8">
                         <p>Total Coupon Used</p>
                         <h2 class="font-bold">{{ coupon_used }}</h2>
@@ -148,7 +143,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> {% endcomment %}
 
 
 

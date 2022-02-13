@@ -38,17 +38,23 @@
                                     
                                     <th>ID</th>
                                     <th>Customer Name </th>
-                                    <th>Customer Phone </th>
+                         
                                     <th>Date </th>
                                     <th>Amount </th>
+                                    <th>Remove </th>
+
                                 </tr>
                                 {% for ar in deposite %}
-                                <tr id="{{ ar.id }}">
+                                <tr id="row_{{ ar.id }}">
                                     <td>{{ ar.id}} </td>
                                     <td >{{ ar.customer.name }}</td>
-                                    <td >{{ ar.customer.phone_number }}</td>
+                            
                                     <td >{{ ar.created_at }}</td>
-                                    <td >{{ ar.amount }}</td
+                                    <td >{{ ar.amount }}</td>
+                                        <td >
+                                <i onclick="remove_sell('{{ar.id}}')" style="color:red; cursor:pointer" class="fa fa-trash"></i>
+                        
+                                </td>
                                 </tr>
                                 {% endfor %}
                             </table>
@@ -86,6 +92,12 @@
                                         <input  min="1" step="1" oninput="validity.valid||(value='');" name="amount" type="number" class="form-control" id="amount" required>
                                   </div>
                                 </div>
+                                 <div class="form-group row">
+                                  <label for="staticEmail" class="col-sm-3 col-form-label">Date</label>
+                                  <div class="col-sm-9">
+                                        <input id="date" name="date" type="date" class="form-control" required>
+                                  </div>
+                                </div>
                                 <div class="form-group row">
                                     <button type="submit" class="pull-right btn btn-primary">Deposite</button>
                                   </div>
@@ -104,9 +116,30 @@
 
 {% block script %}
 <script>
+    document.getElementById('date').valueAsDate = new Date()
+
         $(".select2bs4").select2({
             theme: "bootstrap4",
         });
 
+function remove_sell(id_){
+    let text;
+if (confirm("Are you sure!") == true) {
+      var data  ={'id': id_, sector:2}
+              $.ajax({
+                url: "/remove/",
+                data: data,
+                type: "GET",
+                success: function (data) {
+
+                    $('#row_'+ data.id +'').remove()
+            },
+                error: function (data) {
+            }
+        });
+} else {
+    return
+}
+}
 </script>
 {% endblock %}

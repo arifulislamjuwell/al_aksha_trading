@@ -22,9 +22,25 @@
                                     </small>
                                          <select name= "cement_type" required class="form-control">
                                             <option value='1'> OPC</option>
-                                            <option value="2">PCC</option>
+                                            <option selected value="2">PCC</option>
                                         </select>
                                 </div>
+
+                                <div class="form-group"> 
+                                    <small>
+                                        <label>Unit Price <small style="color: red">*</small> </label>
+                                        <input oninput="update_total()" name="unit_price" type="number" class="form-control" id="unit_price">
+                                    </small>
+                                </div>
+
+                                <div class="form-group"> 
+                                    <small>
+                                        <label> Paid <small style="color: red">*</small> </label>
+                                        <input disabled value="0" oninput="update_total()"  min="0" step="1" oninput="validity.valid||(value='');" name="paid" type="number" class="form-control" id="paid" required>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <small>
                                         <label>Quantity <small style="color: red">*</small> </label>
@@ -33,33 +49,22 @@
                                 </div>
                                 <div class="form-group"> 
                                     <small>
-                                        <label>Unit Price <small style="color: red">*</small> </label>
-                                        <input oninput="update_total()" name="unit_price" type="number" class="form-control" id="unit_price">
-                                    </small>
-                                </div>
-                                <div class="form-group"> 
-                                    <small>
                                         <label> Total <small style="color: red">*</small> </label>
                                         <input name="total" type="number" class="form-control" id="total">
                                     </small>
                                 </div>
-                                  <div class="form-group"> 
-                                <small>
-                                    <label> Paid <small style="color: red">*</small> </label>
-                                    <input disabled value="0" oninput="update_total()"  min="0" step="1" oninput="validity.valid||(value='');" name="paid" type="number" class="form-control" id="paid" required>
-                                </small>
+                                <div class="form-group"> 
+                                    <small>
+                                        <label>Date  <small style="color: red">*</small> </label>
+                                         <input id="date" name="date" type="date" class="form-control" required>
+                                    </small>
+                                </div>
                             </div>
-                            </div>
-
                         </div>
+                    <button type="submit" class="btn btn-primary float-right">Purchase</button>
 
-
-                    <button type="submit" class="btn btn-primary">Purchase</button>
-                    </div>    
                     </div>
                 </div>
-                
-               
             </div>
         </div>
     </form>
@@ -72,7 +77,7 @@
 
 
 
-
+    document.getElementById('date').valueAsDate = new Date()
         function validate(){
           
             if ($('input:checkbox').filter(':checked').length < 1){

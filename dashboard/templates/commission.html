@@ -40,15 +40,20 @@
                                     <th>Date </th>
                                     <th>Unit </th>
                                     <th>Total </th>
+                                    <th>Remove </th>
 
                                 </tr>
                                 {% for ar in commission %}
-                                <tr id="{{ ar.id }}">
+                                <tr id="row_{{ ar.id }}">
                                     <td>{{ ar.id }} </td>
                             
                                     <td>{{ ar.date }} </td>
                                     <td >{{ ar.unit_amount }}</td>
                                     <td >{{ ar.amount }}</td>
+                                     <td >
+                                <i onclick="remove_sell('{{ar.id}}')" style="color:red; cursor:pointer" class="fa fa-trash"></i>
+                        
+                                </td>
                                 </tr>
                                 {% endfor %}
                             </table>
@@ -109,4 +114,25 @@
 {% endblock %}
 
 {% block script %}
+<script>
+function remove_sell(id_){
+    let text;
+if (confirm("Are you sure!") == true) {
+      var data  ={'id': id_, sector:5}
+              $.ajax({
+                url: "/remove/",
+                data: data,
+                type: "GET",
+                success: function (data) {
+
+                    $('#row_'+ data.id +'').remove()
+            },
+                error: function (data) {
+            }
+        });
+} else {
+    return
+}
+}
+</script>
 {% endblock %}

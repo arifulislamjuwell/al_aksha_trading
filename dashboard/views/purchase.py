@@ -34,6 +34,7 @@ class CreatePurchaseView(LoginRequiredMixin, View):
         quantity= data.get('quantity')
         unit_price= data.get('unit_price')
         total= data.get('total')
+        date= data.get('date')
 
         purchase= Purchase()
         purchase.sub_total= int(total)
@@ -41,6 +42,7 @@ class CreatePurchaseView(LoginRequiredMixin, View):
         purchase.cement_type= int(cement_type)
         purchase.unit_price= float(unit_price)
         purchase.quantity= int(quantity)
+        purchase.created_at = date
         purchase.save()
 
         return redirect('dashboard:purchase_url')
@@ -81,7 +83,7 @@ class CommissionView(LoginRequiredMixin, View):
 class MyTransactionView(LoginRequiredMixin, View):
 
     def get(self, request):
-        my_transaction= MyTransaction.objects.all()
+        my_transaction= MyTransaction.objects.order_by('-id')
 
         context= {
             'my_transaction': my_transaction
@@ -104,9 +106,11 @@ class MyDepositeView(LoginRequiredMixin, View):
         data= request.POST
         amount= data.get('amount')
         note= data.get('note')
+        date= data.get('date')
 
         depo = MyDeposite()
         depo.amount= amount
+        depo.created_at = date
         if note:
             depo.note= note
         depo.save()

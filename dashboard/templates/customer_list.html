@@ -38,11 +38,11 @@
             <div class="card mt-3">
                     <div class="card-header">
                         <div class="row">
-                            <div class="col-md-10">
+                            <div class="col-md-9">
                                 <h5>Customer List</h5>
                             </div>
 
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
                                Create Customer
                                 </button>
@@ -58,19 +58,20 @@
                                 <th>ID</th>
                                 <th>Name </th>
                                 <th>Mobile Number</th>
-                                <th>Email</th>
+                                
                                 <th>Area</th>
                                 <th>Address</th>
                                 <th>Balance</th>
                                 <th>Transaction</th>
+                                <th>Remove</th>
 
                             </tr>
                             {% for cus in customer %}
-                            <tr id="{{ cus.id }}">
+                            <tr id="row_{{ cus.id }}">
                                 <td>{{ cus.id }} </td>
                                 <td>{{ cus.name }} </td>
                                 <td >{{ cus.phone_number }}</td>
-                                <td >{{ cus.email }}</td>
+                              
                                 <td >{{ cus.area.name }}</td>
                                 <td >{{ cus.address }}</td>
                                 <td > {{ cus.balance.current_balance }}</td>
@@ -78,8 +79,12 @@
                                 <td >
                                     <a href="{% url 'dashboard:transaction_url' cus.id %}">
                                     <button class="btn btn-primary">Show Transaction</button><a>
+                                    
                                 </td>
-
+ <td >
+                                <i onclick="remove_sell('{{cus.id}}')" style="color:red; cursor:pointer" class="fa fa-trash"></i>
+                        
+                                </td>
                             </tr>
                             {% endfor %}
                         </table>
@@ -158,7 +163,25 @@
         $("#confirm_id").val(id)
         $("#confirmModal").modal('toggle');
     }
+function remove_sell(id_){
+    let text;
+if (confirm("Are you sure!") == true) {
+      var data  ={'id': id_, sector:6}
+              $.ajax({
+                url: "/remove/",
+                data: data,
+                type: "GET",
+                success: function (data) {
 
+                    $('#row_'+ data.id +'').remove()
+            },
+                error: function (data) {
+            }
+        });
+} else {
+    return
+}
+}
 </script>
 <script src="{% static 'js/custom/delete_row.js' %}"> </script>
 <script src="{% static 'js/custom/single_status_change.js' %}"> </script>

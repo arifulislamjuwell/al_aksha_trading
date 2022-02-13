@@ -45,11 +45,11 @@
             <div class="card mt-3">
                     <div class="card-header">
                         <div class="row">
-                            <div class="col-md-10">
+                            <div class="col-md-9">
                                 <h5>Purchase List</h5>
                             </div>
 
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                             <a href="{% url 'dashboard:create_purchase_url' %}">
                                    <button type="button" class="btn btn-primary">
                                Create Purchase
@@ -71,9 +71,11 @@
                                 <th>Details </th>
                                 <th>Total</th>
                                 <th>Paid</th>
+                                <th>Remove</th>
+
                             </tr>
                             {% for cus in purchase %}
-                            <tr id="{{ cus.id }}">
+                            <tr id="row_{{ cus.id }}">
                                 <td>{{ cus.id }} </td>
                                 <td>{{ cus.created_at }} </td>
                                 <td >{{ cus.get_cement_type_display }}</td>
@@ -87,7 +89,10 @@
 
                                 <td >{{ cus.sub_total }}</td>
                                 <td >{{ cus.paid }}</td>
-
+                                <td >
+                                <i onclick="remove_sell('{{cus.id}}')" style="color:red; cursor:pointer" class="fa fa-trash"></i>
+                            
+                                </td>
                             </tr>
                             {% endfor %}
                         </table>
@@ -102,6 +107,26 @@
 
 {% block script %}
 
+<script>
+function remove_sell(id_){
+    let text;
+if (confirm("Are you sure!") == true) {
+      var data  ={'id': id_, sector:3}
+              $.ajax({
+                url: "/remove/",
+                data: data,
+                type: "GET",
+                success: function (data) {
 
+                    $('#row_'+ data.id +'').remove()
+            },
+                error: function (data) {
+            }
+        });
+} else {
+    return
+}
+}
+</script>
 
 {% endblock %}

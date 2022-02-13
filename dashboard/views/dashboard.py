@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import User
 import logging
-from dashboard.models import Commission, Customer, Revenue, Sell, Stock, OPC, PCC
+from dashboard.models import Commission, Customer, Deposite, MyBalance, MyDeposite, OPC, PCC, Purchase, Revenue, Sell, Stock
 from django.db.models import Sum
 from datetime import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -15,7 +15,8 @@ class DashboardView(LoginRequiredMixin, View):
 
     def get(self, request):
         stock= Stock.objects.first()
-        return render(request, 'dashboard.html', {'stock': stock}) 
+        balance = MyBalance.objects.first()
+        return render(request, 'dashboard.html', {'stock': stock, 'balance': balance}) 
 
 class RevenueView(LoginRequiredMixin, View):
 
@@ -81,5 +82,15 @@ class RemoveView(View):
         id_= data.get('id')
         if sector == '1':
             model= Sell
+        if sector == '2':
+            model= Deposite
+        if sector == '3':
+            model= Purchase
+        if sector == '4':
+            model= MyDeposite
+        if sector == '5':
+            model= Commission
+        if sector == '6':
+            model= Customer
         model.objects.get(id= id_).delete()
         return JsonResponse({'id': id_})

@@ -24,22 +24,56 @@ TRANSACTION_TYPE= (
     (COMMISSION, 'Commission'),
 
 )
-def get_my_cur_balance():
-    curr= MyTransaction.objects.all().order_by('-id')
-    return curr[0].current_balance if curr.exists() else 0
+class MyBalance(models.Model):
+    purchase_amount = models.IntegerField(default=0)
+    paid_amount = models.IntegerField(default=0)
+
+    def __str__(self) -> str:
+        return f'Purchase: {self.purchase_amount}, Paid: {self.paid_amount}'
+
+    @property
+    def due_amount(self):
+        return self.paid_amount - self.purchase_amount if  self.purchase_amount  > self.paid_amount else 0
+    
+    @property
+    def current_balance(self):
+        # return self.total_purchase_amount - self.total_paid_amount
+        return self.paid_amount - self.purchase_amount
+
 
 class MyTransaction(models.Model):
     transaction_type= models.PositiveSmallIntegerField(choices= TRANSACTION_TYPE)
-    amount= models.IntegerField()
-    current_balance= models.IntegerField(default=0)
+    bill= models.IntegerField(default=0)
+    paid= models.IntegerField(default=0)
     created_at= models.DateField(auto_now_add=True)
     description= models.TextField(null=True)
     quantity= models.IntegerField(blank= True, null=True)
+    purchase_dependency_id= models.CharField(max_length=10, null= True)
+    deposit_dependency_id= models.CharField(max_length=10, null= True)
+    commission_dependency_id= models.CharField(max_length=10, null= True)
 
+@receiver(post_save, sender=MyTransaction)
+def update_my_balance(sender, instance, created, **kwargs):
+    if created:
+        balance= MyBalance.objects.first()
+        if balance is None:
+            balance = MyBalance()
+            balance.save()
+        balance.purchase_amount = F('purchase_amount') + instance.bill
+        balance.paid_amount= F('paid_amount') + instance.paid
+        balance.save()
+
+@receiver(pre_delete, sender=MyTransaction)
+def back_previous_my_transaction_remove(sender, instance, using, **kwargs):
+    balance = MyBalance.objects.first()
+    balance.purchase_amount = F('purchase_amount') - instance.bill
+    balance.paid_amount= F('paid_amount') - instance.paid
+    balance.save()
 
 class MyDeposite(models.Model):
     amount= models.IntegerField()
-    created_at= models.DateField( auto_now_add=True)
+    created_at= models.DateField( auto_now_add=False)
+    purchase_dependency_id =  models.CharField(max_length=10, null= True)
     note= models.TextField(null= True)
 
 @receiver(post_save, sender=MyDeposite)
@@ -47,11 +81,15 @@ def update_my_deposite_transaction(sender, instance, created, **kwargs):
     if created:
         my_transaction= MyTransaction()
         my_transaction.transaction_type = DEPOSITE
-        my_transaction.amount= instance.amount
-        cur= get_my_cur_balance()
-        my_transaction.current_balance= int(cur) + int(instance.amount)
+        my_transaction.paid= instance.amount
         my_transaction.description= instance.note
+        my_transaction.deposit_dependency_id = str(instance.id)
         my_transaction.save()
+
+@receiver(pre_delete, sender=MyDeposite)
+def back_previous_my_deposit_remove(sender, instance, using, **kwargs):
+    MyTransaction.objects.filter(deposit_dependency_id = str(instance.id)).delete()
+
 
 class Purchase(models.Model):
     sub_total= models.IntegerField()
@@ -59,7 +97,7 @@ class Purchase(models.Model):
     cement_type= models.PositiveSmallIntegerField(choices= CEMENT_TYPE)
     quantity= models.IntegerField()
     unit_price= models.FloatField()
-    created_at= models.DateField( auto_now_add=True)
+    created_at= models.DateField( auto_now_add=False)
 
 @receiver(post_save, sender=Purchase)
 def update_my_transaction(sender, instance, created, **kwargs):
@@ -72,108 +110,29 @@ def update_my_transaction(sender, instance, created, **kwargs):
             stock.pcc += instance.quantity
             description= 'PCC50KG(BAG)'
         stock.save()
-        total_amount= instance.sub_total
-        paid_amount= 0
-        try:
-            my_transaction= MyTransaction.objects.all().order_by('-id')[0]
-        except:
-            my_transaction= None
 
-        if my_transaction:
-            if my_transaction.current_balance != 0:
-                if paid_amount == 0:
-                    if my_transaction.current_balance ==  total_amount:
-                        my_transaction= MyTransaction()
-                        my_transaction.transaction_type = BUY
-                        my_transaction.amount= total_amount
-                        cur= get_my_cur_balance()
-                        my_transaction.save()
-                        my_transaction.current_balance = int(cur) + (-total_amount)
-                        my_transaction.description= description
-                        my_transaction.quantity= instance.quantity
-                        my_transaction.save()
-                        
-                    if my_transaction.current_balance > total_amount or (my_transaction.current_balance < total_amount):
-                        my_transaction= MyTransaction()
-                        my_transaction.transaction_type = BUY
-                        my_transaction.amount= total_amount
-                        cur= get_my_cur_balance()
-                        my_transaction.save()
-                        my_transaction.current_balance = int(cur) + (-total_amount)
-                        my_transaction.description= description
-                        my_transaction.quantity= instance.quantity
-                        my_transaction.save()
-                else:
-                    deposite= MyDeposite()
-                    deposite.amount = paid_amount
-                    deposite.save()
+        purchase_id= instance.id
+        final_bill = instance.sub_total
+        paid_amount = instance.paid
 
-                    my_transaction= MyTransaction()
-                    my_transaction.transaction_type = BUY
-                    my_transaction.amount= total_amount
-                    cur= get_my_cur_balance()
-                    my_transaction.save()
-                    my_transaction.current_balance = int(cur) + (-total_amount)
-                    my_transaction.description= description
-                    my_transaction.quantity= instance.quantity
-
-                    my_transaction.save()
-                
+        if paid_amount > final_bill:
+            deposit_amount= paid_amount - final_bill
+            create_my_transaction(paid=final_bill, bill=final_bill, quantity= instance.quantity, description= description, purchase_dependency_id=purchase_id)
+            create_deposit_record(deposit_amount, purchase_id)
         else:
-            if total_amount == paid_amount:
-                my_transaction= MyTransaction()
-                my_transaction.transaction_type = BUY
-                my_transaction.amount= total_amount
-                my_transaction.current_balance = 0
-                my_transaction.description= description
-                my_transaction.quantity= instance.quantity
-                my_transaction.save()
+            create_my_transaction( paid=paid_amount, bill=final_bill, quantity= instance.quantity, description= description, purchase_dependency_id=purchase_id)
 
-            if paid_amount != 0:
-                if total_amount > paid_amount:
-                    deposite= MyDeposite()
-                    deposite.amount = paid_amount
-                    deposite.save()
-
-                    my_transaction= MyTransaction()
-                    my_transaction.transaction_type = BUY
-                    my_transaction.amount= total_amount
-                    cur= get_my_cur_balance()
-                    my_transaction.save()
-                    my_transaction.current_balance = int(cur) + (-int(total_amount))
-                    my_transaction.description= description
-                    my_transaction.quantity= instance.quantity
-                    my_transaction.save()
-                else:
-                    deposite= MyDeposite()
-                    deposite.amount = paid_amount
-                    deposite.save()
-
-                    my_transaction= MyTransaction()
-                    my_transaction.transaction_type = BUY
-                    my_transaction.amount= total_amount
-                    cur= get_my_cur_balance()
-                    my_transaction.save()
-                    my_transaction.current_balance = int(cur) + (-int(total_amount))
-                    my_transaction.description= description
-                    my_transaction.quantity= instance.quantity
-                    my_transaction.save()  
-            else:
-                my_transaction= MyTransaction()
-                my_transaction.transaction_type = BUY
-                my_transaction.amount= total_amount
-                cur= get_my_cur_balance()
-                my_transaction.save()
-                my_transaction.current_balance = int(cur) + (-int(total_amount))
-                my_transaction.description= description
-                my_transaction.quantity= instance.quantity
-                my_transaction.save()
-
-
-def get_cur_balance(customer):
-    curr= CustomerTransaction.objects.filter(customer= customer).order_by('-created_at')
-    return curr[0].current_balance if curr.exists() else 0
-
+@receiver(pre_delete, sender=Purchase)
+def back_previous_purchase_remove(sender, instance, using, **kwargs):
+    stock= Stock.objects.first()
+    if instance.cement_type == OPC:
+        stock.opc += instance.quantity
+    else:
+        stock.pcc += instance.quantity
+    stock.save()
+    purchase_id= str(instance.id)
+    MyTransaction.objects.filter(purchase_dependency_id = purchase_id).delete()
+    Deposite.objects.filter(purchase_dependency_id = purchase_id).delete()
 
 class Area(models.Model):
     name= models.CharField(max_length=50)
@@ -205,7 +164,6 @@ class CustomerTransaction(models.Model):
         return self.customer.name + 'id:-'+ str(self.id)
 
 def create_transaction(customer, paid, bill, quantity, description, sell_dependency_id= None):
-
     customer_t = CustomerTransaction()
     customer_t.customer = customer
     customer_t.bill= bill
@@ -216,12 +174,27 @@ def create_transaction(customer, paid, bill, quantity, description, sell_depende
     customer_t.sell_dependency_id= sell_dependency_id
     customer_t.save()
 
+def create_my_transaction( paid, bill, quantity, description, purchase_dependency_id= None):
+    customer_t = MyTransaction()
+    customer_t.bill= bill
+    customer_t.transaction_type = BUY
+    customer_t.quantity = quantity
+    customer_t.paid = paid
+    customer_t.description= description
+    customer_t.purchase_dependency_id= purchase_dependency_id
+    customer_t.save()
 
 def create_deposit_record(customer, amount, sell_dependency_id= None):
     Deposite.objects.create(
         customer=customer,
         amount=amount,
         sell_dependency_id= sell_dependency_id
+    )
+
+def create_my_deposit_record(amount, purchase_dependency_id= None):
+    MyDeposite.objects.create(
+        amount=amount,
+        purchase_dependency_id= purchase_dependency_id
     )
 
 class CustomerBalance(models.Model):
@@ -266,7 +239,7 @@ class Sell(models.Model):
     unit_price = models.FloatField()
     total_bill= models.IntegerField(default= 0)
     paid_amount= models.IntegerField(default= 0)
-    created_at= models.DateField( auto_now_add=True)
+    created_at= models.DateField( auto_now_add=False)
 
 @receiver(pre_delete, sender=Sell)
 def back_previous_sell_remove(sender, instance, using, **kwargs):
@@ -309,13 +282,13 @@ def update_customer_transaction(sender, instance, created, **kwargs):
 class Deposite(models.Model):
     customer= models.ForeignKey(Customer,related_name='deposites', on_delete=models.CASCADE, null=True)
     amount= models.IntegerField()
-    created_at= models.DateField( auto_now_add=True)
+    created_at= models.DateField( auto_now_add=False)
     sell_dependency_id= models.CharField(max_length=10, null= True)
 
 
 @receiver(pre_delete, sender=Deposite)
 def back_previous_deposit_remove(sender, instance, using, **kwargs):
-    CustomerTransaction.objeects.filter(deposit_dependency_id = str(instance.id)).delete()
+    CustomerTransaction.objects.filter(deposit_dependency_id = str(instance.id)).delete()
 
 @receiver(post_save, sender=Deposite)
 def update_transaction(sender, instance, created, **kwargs):
@@ -345,16 +318,21 @@ class Commission(models.Model):
     unit_amount= models.FloatField()
     note= models.CharField(max_length=250)
 
+
 @receiver(post_save, sender=Commission)
-def commission_transaction_update(sender, instance, created, **kwargs):
+def update_my_commission_transaction(sender, instance, created, **kwargs):
     if created:
         my_transaction= MyTransaction()
         my_transaction.transaction_type = COMMISSION
-        my_transaction.amount= instance.amount
-        cur= get_my_cur_balance()
-        my_transaction.current_balance= int(cur) + int(instance.amount)
+        my_transaction.paid= instance.amount
         my_transaction.description= instance.note
+        my_transaction.commission_dependency_id = str(instance.id)
         my_transaction.save()
+
+@receiver(pre_delete, sender=Commission)
+def back_previous_my_commission_remove(sender, instance, using, **kwargs):
+    MyTransaction.objects.filter(commission_dependency_id = str(instance.id)).delete()
+
 
 class Revenue(models.Model):
     customer= models.ForeignKey(Customer, related_name="revenues", on_delete=models.CASCADE)

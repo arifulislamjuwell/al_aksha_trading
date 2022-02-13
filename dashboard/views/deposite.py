@@ -35,10 +35,12 @@ class DepositeView(LoginRequiredMixin, View):
         data= request.POST
         customer= data.get('customer')
         amount= data.get('amount')
+        date= data.get('date')
 
         depo = Deposite()
         depo.customer_id= customer
         depo.amount= amount
+        depo.created_at = date
         depo.save()
 
         return redirect('dashboard:deposite_url')
