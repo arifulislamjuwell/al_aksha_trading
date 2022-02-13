@@ -126,9 +126,9 @@ def update_my_transaction(sender, instance, created, **kwargs):
 def back_previous_purchase_remove(sender, instance, using, **kwargs):
     stock= Stock.objects.first()
     if instance.cement_type == OPC:
-        stock.opc += instance.quantity
+        stock.opc-= instance.quantity
     else:
-        stock.pcc += instance.quantity
+        stock.pcc -= instance.quantity
     stock.save()
     purchase_id= str(instance.id)
     MyTransaction.objects.filter(purchase_dependency_id = purchase_id).delete()
