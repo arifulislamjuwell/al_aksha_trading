@@ -132,7 +132,7 @@ def back_previous_purchase_remove(sender, instance, using, **kwargs):
     stock.save()
     purchase_id= str(instance.id)
     MyTransaction.objects.filter(purchase_dependency_id = purchase_id).delete()
-    Deposite.objects.filter(purchase_dependency_id = purchase_id).delete()
+    MyDeposite.objects.filter(purchase_dependency_id = purchase_id).delete()
 
 class Area(models.Model):
     name= models.CharField(max_length=50)
