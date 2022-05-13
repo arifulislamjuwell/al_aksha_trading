@@ -53,6 +53,7 @@
                                     <td >{{ ar.amount }}</td>
                                         <td >
                                 <i onclick="remove_sell('{{ar.id}}')" style="color:red; cursor:pointer" class="fa fa-trash"></i>
+                               <a href="{% url 'dashboard:update_customer_deposit_url' ar.id %}"> <i style="color:red; cursor:pointer; padding-left: 1em;" class="fa fa-edit"></i> <a>
                         
                                 </td>
                                 </tr>
@@ -75,7 +76,7 @@
                             <form method="Post">
                                 {% csrf_token %}
                                 <div class="form-group row">
-                                  <label for="staticEmail" class="col-sm-3 col-form-label">Name</label>
+                                  <label for="staticEmail" class="col-sm-3 col-form-label">Customer</label>
                                   <div class="col-sm-9">
                                       <select name="customer" id="customer" class=" form-control select2bs4" style="width: 100%;" required> 
                                         <option value="">Select Customer</option>

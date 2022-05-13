@@ -6,54 +6,13 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-12">
-            <div class="row">
+      
                 <div class="col-md-7">
                     <div class="card mt-3">
                         <div class="card-header">
                             <div class="row">
                                 <div class="col-md-9">
-                                    <h5>My Deposite List</h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body table-responsive">
-    
-                            <table  class="table table-borderless table-striped table-hover">
-     
-                                <tr>
-                                    
-                                    <th>ID</th>
-
-                                    <th>Date </th>
-                                    <th>Note </th>
-                                    <th>Amount </th>
-                                    <th>Remove </th>
-
-                                </tr>
-                                {% for ar in deposite %}
-                                <tr id="row_{{ ar.id }}">
-                                    <td>{{ ar.id}} </td>
-                                    <td >{{ ar.created_at }}</td>
-                                    <td >{{ ar.note }}</td>
-                                    <td >{{ ar.amount }}</td>
-                                     <td >
-                                <i onclick="remove_sell('{{ar.id}}')" style="color:red; cursor:pointer" class="fa fa-trash"></i>
-                        
-                                </td>
-                                </tr>
-                                {% endfor %}
-                            </table>
-                        </div>
-                </div>
-
-                </div>
-                <div class="col-md-5">
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-md-9">
-                                    <h5>My Deposite </h5>
+                                    <h5>Update My Deposite </h5>
                                 </div>
                             </div>
                         </div>
@@ -64,13 +23,13 @@
                                 <div class="form-group row">
                                   <label for="staticEmail" class="col-sm-3 col-form-label">Amount</label>
                                   <div class="col-sm-9">
-                                        <input  min="1" step="1" oninput="validity.valid||(value='');" name="amount" type="number" class="form-control" id="amount" required>
+                                        <input value="{{ deposit.amount }}" min="1" step="1" oninput="validity.valid||(value='');" name="amount" type="number" class="form-control" id="amount" required>
                                   </div>
                                 </div>
                                 <div class="form-group row">
                                   <label for="staticEmail" class="col-sm-3 col-form-label">Note</label>
                                   <div class="col-sm-9">
-                                        <textarea name="note" class="form-control" id="note"> </textarea>
+                                        <textarea name="note" class="form-control" id="note">{{ deposit.note }}</textarea>
                                   </div>
                                 </div>
                                  <div class="form-group row">
@@ -86,9 +45,6 @@
                         </div>
                 </div>
 
-                </div>
-            </div>
-
         </div>
     </div>
 </div>
@@ -97,7 +53,7 @@
 
 {% block script %}
 <script>
-    document.getElementById('date').valueAsDate = new Date()
+    document.getElementById('date').value =  new Date("{{ deposit.created_at.isoformat }}").toISOString().substr(0, 10)
 
         $(".select2bs4").select2({
             theme: "bootstrap4",

@@ -51,25 +51,39 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Date</th>
-                                <th>Transaction Type</th>
+                                <th>T Type</th>
                                 <th>Quantity</th>
                                 <th>Details</th>
-
                                 <th> Bill</th>
-
                                 <th> Paid</th>
+                                <th> Current Balance</th>
+
 
                             </tr>
-                            {% for trans in transaction %}
-                            <tr id="{{ trans.id }}">
-
+                            <tr>
                                 <td>{{ trans.id }} </td>
-                                <td >{{ trans.created_at }}</td>
-                                <td >{{ trans.get_transaction_type_display }}</td>
-                                <td >{% if trans.quantity %}{{ trans.quantity }}{% else %} {% endif %}</td>
-                                <td >{{ trans.description }}</td>
-                                <td >{{ trans.bill }}</td>
+                                <td>{{ trans.id }} </td>
+                                <td>{{ trans.id }} </td>
+                                <td>{{ trans.id }} </td>
+                                <td>Opening Balance </td>
+                                <td> </td>
+                                <td></td>
+                                <td>
+                                  {{ opening_balance }} 
+                                 </td>
+
+                            <tr>
+                            {% for trans in row_list %}
+
+                            <tr id="{{ trans.id }}">
+                                <td>{{ trans.id }} </td>
+                                <td >{{ trans.date }}</td>
+                                <td >{{ trans.transaction_type }}</td>
+                                <td >{{ trans.quantity }}</td>
+                                <td >{{ trans.details }}</td>
+                                <td >{{ trans.total_bill }}</td>
                                 <td >{{ trans.paid }}</td>
+                                <td >{{ trans.current_balance }}</td>
                             </tr>
                             {% endfor %}
                         </table>

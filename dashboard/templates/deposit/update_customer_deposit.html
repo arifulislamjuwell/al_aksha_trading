@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-md-7">
+            <div class="card mt-3">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <h5>Update Deposite </h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body table-responsive">
+                    <form method="Post">
+                        {% csrf_token %}
+                        <div class="form-group row">
+                            <label for="staticEmail" class="col-sm-3 col-form-label">Name</label>
+                            <div class="col-sm-9">
+                                <select name="customer" id="customer" class=" form-control select2bs4" style="width: 100%;" required> 
+                                <option value="">Select Customer</option>
+                                {% for c in customer %}
+                                    <option {% if c.id == deposit.customer_id %} selected {% endif %} value="{{ c.id }}"> {{ c.name }}- {{ c.phone_number }}  </option>
+                                {% endfor %}
+        
+                            </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="staticEmail" class="col-sm-3 col-form-label">Amount</label>
+                            <div class="col-sm-9">
+                                <input value="{{ deposit.amount }}" min="1" step="1" oninput="validity.valid||(value='');" name="amount" type="number" class="form-control" id="amount" required>
+                            </div>
+                        </div>
+                            <div class="form-group row">
+                            <label for="staticEmail" class="col-sm-3 col-form-label">Date</label>
+                            <div class="col-sm-9">
+                                <input id="date" name="date" type="date" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <button type="submit" class="pull-right btn btn-primary">Deposite</button>
+                            </div>
+                        </form>
+                </div>
+        </div>
+
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    document.getElementById('date').value = new Date("{{ deposit.created_at.isoformat }}").toISOString().substr(0, 10)
+
+        $(".select2bs4").select2({
+            theme: "bootstrap4",
+        });
+        
+</script>
+{% endblock %}

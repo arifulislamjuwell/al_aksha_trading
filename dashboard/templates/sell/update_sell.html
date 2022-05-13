@@ -13,7 +13,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        Sell Details
+                        Sell Update
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -26,7 +26,7 @@
                                     <select name="customer" id="customer" class=" form-control select2bs4" style="width: 100%;" required> 
                                         <option value="">Select Customer</option>
                                         {% for c in customer %}
-                                            <option value="{{ c.id }}"> {{ c.name }}- {{ c.phone_number }}  </option>
+                                            <option {% if c.id == sell.customer_id %} selected {% endif %} value="{{ c.id }}"> {{ c.name }}- {{ c.phone_number }}  </option>
                                         {% endfor %}
                 
                                     </select>
@@ -34,7 +34,7 @@
                                 <div class="form-group"> 
                                     <small>
                                         <label>Quantity <small style="color: red">*</small> </label>
-                                        <input oninput="update_total()"  min="1" step="1" oninput="validity.valid||(value='');" name="quantity" type="number" class="form-control" id="quantity" required>
+                                        <input value="{{ sell.quantity }}" oninput="update_total()"  min="1" step="1" oninput="validity.valid||(value='');" name="quantity" type="number" class="form-control" id="quantity" required>
 
                                     </small>
 
@@ -44,14 +44,14 @@
                                     <small>
                                         <label> Total Amount  <small style="color: red">*</small> </label>
                                     </small>
-                                        <input  min="1" step="1" oninput="validity.valid||(value='');" name="total" type="number" class="form-control" id="total" required>
+                                        <input value="{{ sell.total_bill }}"  min="1" step="1" oninput="validity.valid||(value='');" name="total" type="number" class="form-control" id="total" required>
 
                                 </div>
                                     <div class="form-group">
                                     <small>
                                         <label>Date  <small style="color: red">*</small> </label>
                                     </small>
-                                        <input id="date" name="date" type="date" class="form-control" required>
+                                        <input  id="date" name="date" type="date" class="form-control" required>
 
                                 </div>
     
@@ -62,8 +62,8 @@
                                         <label>Cement Type <small style="color: red">*</small> </label>
                                     </small>
                                     <select name="type" id="type" class=" form-control select2bs4" style="width: 100%;" required> 
-                                        <option  value="1">OPC</option>
-                                        <option selected value="2">PCC</option>
+                                        <option {% if sell.cement_type == 1 %} selected {% endif %} value="1">OPC</option>
+                                        <option {% if sell.cement_type == 2 %} selected {% endif %} value="2">PCC</option>
 
 
                                     </select>
@@ -73,7 +73,7 @@
                                     <small>
                                         <label>Unit Price <small style="color: red">*</small> </label>
                                     </small>
-                                        <input oninput="update_total()"  name="unit_price" type="float" class="form-control" id="unit_price" required>
+                                        <input  value="{{ sell.unit_price }}" oninput="update_total()"  name="unit_price" type="float" class="form-control" id="unit_price" required>
 
                                 </div>
 
@@ -81,7 +81,7 @@
                                     <small>
                                         <label> Paid Amount  <small style="color: red">*</small> </label>
                                     </small>
-                                        <input  min="0" step="1" oninput="validity.valid||(value='');" name="paid" type="number" class="form-control" id="paid" required>
+                                        <input value="{{ sell.paid_amount }}" min="0" step="1" oninput="validity.valid||(value='');" name="paid" type="number" class="form-control" id="paid" required>
 
                                 </div>
                             </div>
@@ -90,7 +90,7 @@
                 <div class="row">
             <div class="col-md-12">
                 <div class="row">
-                    <button type="submit" class="btn btn-primary pull-right"><i class="fa fa-pen-square"></i> Create </button>
+                    <button type="submit" class="btn btn-primary pull-right"><i class="fa fa-pen-square"></i> Update </button>
                 </div>
                
             </div>
@@ -108,8 +108,9 @@
 {% block script %}
 
     <script>
-    document.getElementById('date').valueAsDate = new Date()
+    document.getElementById('date').value =  new Date("{{ sell.created_at.isoformat }}").toISOString().substr(0, 10)
 
+       
 
         function update_total(){
             var quantity = $('#quantity').val()

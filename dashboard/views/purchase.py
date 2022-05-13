@@ -18,19 +18,18 @@ class PurchaseView(LoginRequiredMixin, View):
         context={
              'purchase': purchase,
         }
-        return render(request, 'purchase.html', context)
+        return render(request, 'purchase/purchase.html', context)
 
     
 class CreatePurchaseView(LoginRequiredMixin, View):
 
     def get(self, request):
-        return render(request, 'create_purchase.html')
+        return render(request, 'purchase/create_purchase.html')
 
     def post(self,  request):
         data= request.POST  
         cement_type= data.get('cement_type')
-       
-
+    
         quantity= data.get('quantity')
         unit_price= data.get('unit_price')
         total= data.get('total')
@@ -38,7 +37,6 @@ class CreatePurchaseView(LoginRequiredMixin, View):
 
         purchase= Purchase()
         purchase.sub_total= int(total)
-        purchase.paid= 0
         purchase.cement_type= int(cement_type)
         purchase.unit_price= float(unit_price)
         purchase.quantity= int(quantity)
@@ -92,27 +90,26 @@ class MyTransactionView(LoginRequiredMixin, View):
 
 
 
-class MyDepositeView(LoginRequiredMixin, View):
+class UpdatePurchaseView(View):
 
-    def get(self, request):
-        data= request.GET
-        deposite= MyDeposite.objects.all().order_by('-id')
-        context={
-            'deposite': deposite
-        }
-        return render( request, 'my_deposite.html', context)
+    def get(self, request, id):
+        purchase = Purchase.objects.get(id= id)
+        return render(request, 'purchase/update_purchase.html', {'purchase': purchase})
 
-    def post(self, request):
-        data= request.POST
-        amount= data.get('amount')
-        note= data.get('note')
+    def post(self,  request, id):
+        data= request.POST  
+        cement_type= data.get('cement_type')
+        quantity= data.get('quantity')
+        unit_price= data.get('unit_price')
+        total= data.get('total')
         date= data.get('date')
 
-        depo = MyDeposite()
-        depo.amount= amount
-        depo.created_at = date
-        if note:
-            depo.note= note
-        depo.save()
+        purchase= Purchase.objects.get(id= id)
+        purchase.sub_total= int(total)
+        purchase.cement_type= int(cement_type)
+        purchase.unit_price= float(unit_price)
+        purchase.quantity= int(quantity)
+        purchase.created_at = date
+        purchase.save()
 
-        return redirect('dashboard:my_deposite_url')
+        return redirect('dashboard:purchase_url')

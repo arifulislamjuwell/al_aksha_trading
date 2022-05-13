@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<div class="container">
+      <form method="POST">
+          {% csrf_token %}
+      <div class="modal-body">
+       
+        <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Name</label>
+            <div class="col-sm-10">
+            <input value="{{ customer.name }}" name="name" type="text" class="form-control" id="name" required>
+            </div>
+        </div>
+         <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Phone Number</label>
+            <div class="col-sm-10">
+            <input value="{{ customer.phone_number }}" type="text" class="form-control" name="phone_number" id="phone_number" required>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
+            <div class="col-sm-10">
+            <input  value="{{ customer.email }}" type="text" class="form-control" id="email" name="email">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Area</label>
+            <div class="col-sm-10">
+                <select name="area" class="form-control" id="area" required>
+                <option value=""> Select Area</option>
+
+                {% for i in area %}
+                <option {% if customer.area_id == i.id %} selected {% endif %}  value="{{ i.id }}"> {{ i.name }}</option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
+            <div class="form-group row">
+            <label class="col-sm-2 col-form-label">OP B Type</label>
+            <div class="col-sm-10">
+                <select name="op_balance_type" class="form-control" id="op_balance_type" required>
+        
+                <option {% if customer.opening_balance_type == 1 %} selected {% endif %} value="1">Plus</option>
+                <option {% if customer.opening_balance_type == 2 %} selected {% endif %} value="2">Minus</option>
+                </select>
+            </div>
+        </div>
+         <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Opening Balance</label>
+            <div class="col-sm-10">
+            <input  value="{{ customer.opening_balance }}" min="0" step="1" oninput="validity.valid||(value='');" type="number" class="form-control" id="opening_balance" name="opening_balance">
+            </div>
+        </div>
+         <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Address</label>
+            <div class="col-sm-10">
+            <textarea name="address" class="form-control" required>{{ customer.address }}</textarea>
+            </div>
+        </div>
+       
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="suubmit" class="btn btn-primary"> Update</button>
+      </div>
+    </form>
+</div>
+
+{% endblock %}
+{% block script %}
+
+    <script>
+
+    </script>
+{% endblock %}

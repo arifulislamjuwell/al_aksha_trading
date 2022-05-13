@@ -32,11 +32,10 @@
                                         <input oninput="update_total()" name="unit_price" type="number" class="form-control" id="unit_price">
                                     </small>
                                 </div>
-
                                 <div class="form-group"> 
                                     <small>
-                                        <label> Paid <small style="color: red">*</small> </label>
-                                        <input disabled value="0" oninput="update_total()"  min="0" step="1" oninput="validity.valid||(value='');" name="paid" type="number" class="form-control" id="paid" required>
+                                        <label>Date  <small style="color: red">*</small> </label>
+                                         <input id="date" name="date" type="date" class="form-control" required>
                                     </small>
                                 </div>
                             </div>
@@ -53,12 +52,7 @@
                                         <input name="total" type="number" class="form-control" id="total">
                                     </small>
                                 </div>
-                                <div class="form-group"> 
-                                    <small>
-                                        <label>Date  <small style="color: red">*</small> </label>
-                                         <input id="date" name="date" type="date" class="form-control" required>
-                                    </small>
-                                </div>
+
                             </div>
                         </div>
                     <button type="submit" class="btn btn-primary float-right">Purchase</button>

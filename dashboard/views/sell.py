@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from dashboard.models import Area, Customer, CustomerTransaction, Deposite, OPC, Sell, Stock, BUY
+from dashboard.models import Area, Customer, CustomerTransaction, CustomerDeposit, OPC, Sell, BUY
 from django.contrib.auth.models import User
 import logging
 from django.db.models import Q
@@ -46,32 +46,65 @@ class SellView(LoginRequiredMixin, View):
             'sell': sell,
             'total_data': total_data
         }
-        return render(request, 'sell_list.html', context)
+        return render(request, 'sell/sell_list.html', context)
 
     
 class CreateSellView(LoginRequiredMixin , View):
 
     def get(self, request):
-        customer= Customer.objects.all().order_by('-id')
+        customer= Customer.objects.values('id', 'name', 'phone_number').order_by('name')
 
         context ={
             'customer': customer
         }
-        return render(request, 'create_sell.html', context)
+        return render(request, 'sell/create_sell.html', context)
 
     def post(self,  request):
         data= request.POST
         customer= data.get('customer')
         quantity= data.get('quantity')
-        address= data.get('address')
         type_= data.get('type')
         unit_price= data.get('unit_price')
         total=  data.get('total')
         date=  data.get('date')
-
         paid=  data.get('paid')
 
         sell= Sell()
+        sell.paid_amount= int(paid)
+        sell.customer_id= customer
+        sell.cement_type= int(type_)
+        sell.quantity= int(quantity)
+        sell.total_bill = int(total)
+        sell.unit_price =  float(unit_price)
+        sell.created_at = date
+        sell.save()
+        return redirect('dashboard:sell_url')
+
+
+class UpdateSellView(View):
+
+    def get(self, request, id=None):
+        customer= Customer.objects.values('id', 'name', 'phone_number').order_by('name')
+        sell = Sell.objects.get(id = id)
+
+        context ={
+            'customer': customer,
+            'sell': sell
+        }
+        return render(request, 'sell/update_sell.html', context)
+
+
+    def post(self,  request, id):
+        data= request.POST
+        customer= data.get('customer')
+        quantity= data.get('quantity')
+        type_= data.get('type')
+        unit_price= data.get('unit_price')
+        total=  data.get('total')
+        date=  data.get('date')
+        paid=  data.get('paid')
+
+        sell= Sell.objects.get(id= id)
         sell.paid_amount= int(paid)
         sell.customer_id= customer
         sell.cement_type= int(type_)

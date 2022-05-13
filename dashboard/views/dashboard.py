@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import User
 import logging
-from dashboard.models import Commission, Customer, Deposite, MyBalance, MyDeposite, OPC, PCC, Purchase, Revenue, Sell, Stock
+from dashboard.models import Commission, Customer, CustomerDeposit, MyDeposite, OPC, OpeningStock, PCC, Purchase, Revenue, Sell
 from django.db.models import Sum
 from datetime import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,9 +14,31 @@ from django.http import JsonResponse
 class DashboardView(LoginRequiredMixin, View):
 
     def get(self, request):
-        stock= Stock.objects.first()
-        balance = MyBalance.objects.first()
-        return render(request, 'dashboard.html', {'stock': stock, 'balance': balance}) 
+        stock= OpeningStock.objects.first()
+        pcc_stock = stock.pcc
+        opc_stock = stock.opc
+        total_purchase_quantity = Purchase.objects.values('cement_type').order_by('cement_type').annotate(quantity=Sum('quantity'))
+        total_sell_quantity = Sell.objects.values('cement_type').order_by('cement_type').annotate(quantity=Sum('quantity'))
+    
+        if total_purchase_quantity.exists():
+            for quantity in total_purchase_quantity:
+                if quantity.get('cement_type') == OPC:
+                    opc_stock+= quantity.get('quantity')
+                else:
+                    pcc_stock+= quantity.get('quantity')
+
+        if total_sell_quantity.exists():
+            for quantity in total_sell_quantity:
+                if quantity.get('cement_type') == OPC:
+                    opc_stock-= quantity.get('quantity')
+                else:
+                    pcc_stock-= quantity.get('quantity')
+
+        context = {
+            'pcc_stock': pcc_stock,
+            'opc_stock': opc_stock
+        }
+        return render(request, 'dashboard.html', context) 
 
 class RevenueView(LoginRequiredMixin, View):
 
@@ -83,7 +105,7 @@ class RemoveView(View):
         if sector == '1':
             model= Sell
         if sector == '2':
-            model= Deposite
+            model= CustomerDeposit
         if sector == '3':
             model= Purchase
         if sector == '4':

@@ -104,6 +104,7 @@
                                 <td >{{ cus.paid_amount }}</td>
                                 <td >
                                 <i onclick="remove_sell('{{cus.id}}')" style="color:red; cursor:pointer" class="fa fa-trash"></i>
+                               <a href="{% url 'dashboard:update_sell_url' cus.id %}"> <i style="color:red; cursor:pointer; padding-left: 1em;" class="fa fa-edit"></i> <a>
                             
                                 </td>
 
