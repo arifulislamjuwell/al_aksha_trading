@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import User
 import logging
-from dashboard.models import Commission, Customer, CustomerDeposit, MyDeposite, OPC, OpeningStock, PCC, Purchase, Revenue, Sell
+from dashboard.models import MINUS, Commission, Customer, CustomerDeposit, MyDeposite, OPC, OpeningInformation, PCC, Purchase, Revenue, Sell
 from django.db.models import Sum
 from datetime import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,12 +14,15 @@ from django.http import JsonResponse
 class DashboardView(LoginRequiredMixin, View):
 
     def get(self, request):
-        stock= OpeningStock.objects.first()
+        stock= OpeningInformation.objects.first()
         pcc_stock = stock.pcc
         opc_stock = stock.opc
         total_purchase_quantity = Purchase.objects.values('cement_type').order_by('cement_type').annotate(quantity=Sum('quantity'))
         total_sell_quantity = Sell.objects.values('cement_type').order_by('cement_type').annotate(quantity=Sum('quantity'))
-    
+
+        top_10_customer =  Sell.objects.values('customer__name').annotate(quantity=Sum('quantity'), total_buy=Sum('total_bill')).order_by('-total_buy')
+        print(top_10_customer)
+
         if total_purchase_quantity.exists():
             for quantity in total_purchase_quantity:
                 if quantity.get('cement_type') == OPC:
@@ -34,9 +37,40 @@ class DashboardView(LoginRequiredMixin, View):
                 else:
                     pcc_stock-= quantity.get('quantity')
 
+        opening_balance = 0
+        opening_information = OpeningInformation.objects.first()
+        if opening_information:
+            opening_balance = -opening_information.my_balance if opening_information.my_balance_type == MINUS else opening_information.my_balance
+        
+        total_buy= Purchase.objects.all().aggregate(Sum('sub_total'))
+        total_buy =  total_buy.get('sub_total__sum') if  total_buy.get('sub_total__sum') else 0
+
+
+        total_deposit = MyDeposite.objects.all().aggregate(Sum('amount'))
+        total_deposit =  total_deposit.get('amount__sum') if total_deposit.get('amount__sum') else 0
+
+
+        total_commission = Commission.objects.all().aggregate(Sum('amount'))
+        total_commission =  total_commission.get('amount__sum') if total_commission.get('amount__sum') else 0
+        
+
+
+        my_balance = 0
+        my_due = 0
+        balance =  (opening_balance - total_buy) + total_commission + total_deposit
+        if balance > 0:
+            my_balance = balance
+        else:
+            my_due = balance
+
+
         context = {
             'pcc_stock': pcc_stock,
-            'opc_stock': opc_stock
+            'opc_stock': opc_stock,
+            'my_balance': my_balance,
+            'my_due': my_due,
+            'top_10_customer': top_10_customer
+
         }
         return render(request, 'dashboard.html', context) 
 
@@ -116,3 +150,28 @@ class RemoveView(View):
             model= Customer
         model.objects.get(id= id_).delete()
         return JsonResponse({'id': id_})
+
+
+class OpeningInfoView(View):
+
+    def get(self, request):
+        opening_info = OpeningInformation.objects.first()
+        return render(request, 'opening_info.html', {'opening_info': opening_info})
+
+    
+    def post(self, request):
+        data = request.POST
+        opc= data.get('opc')
+        pcc= data.get('pcc')
+        op_balance_type= data.get('op_balance_type')
+        opening_balance= data.get('opening_balance')
+        opening_info = OpeningInformation.objects.first()
+        if not opening_info:
+            opening_info = OpeningInformation()
+        
+        opening_info.my_balance_type = op_balance_type
+        opening_info.my_balance = opening_balance
+        opening_info.pcc = pcc
+        opening_info.opc = opc
+        opening_info.save() 
+        return redirect('dashboard:opening_info_url')

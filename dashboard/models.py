@@ -31,9 +31,11 @@ PLUS =1
 MINUS = 2
 
 
-class OpeningStock(models.Model):
+class OpeningInformation(models.Model):
     pcc= models.IntegerField(default = 0)
     opc= models.IntegerField(default = 0)
+    my_balance_type = models.IntegerField(default = MINUS)
+    my_balance = models.IntegerField(default = 0)
 
 
 class MyRevenue(models.Model):
@@ -62,7 +64,6 @@ class Commission(models.Model):
 class MyDeposite(models.Model):
     amount= models.IntegerField()
     created_at= models.DateField( auto_now_add=False)
-    purchase_dependency_id =  models.CharField(max_length=10, null= True)
     note= models.TextField(null= True)
     my_transactions = GenericRelation(MyTransaction)
 
@@ -82,7 +83,7 @@ class Purchase(models.Model):
 def my_transaction(sender, instance, created, **kwargs):
     if created:
         transaction = MyTransaction()
-        transaction_type= BUY if sender == Purchase else MyDeposite
+        transaction_type= BUY if sender == Purchase else DEPOSITE
         if sender == Commission:
             transaction_type = COMMISSION
         transaction.transaction_type = transaction_type

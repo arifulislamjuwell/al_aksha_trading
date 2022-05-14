@@ -2,17 +2,20 @@
 from django.contrib import admin
 from django.urls import path, include
 
-from dashboard.views.dashboard import DashboardView, RevenueView, GenerateRevenueView, RemoveView
+from dashboard.views.dashboard import DashboardView, RevenueView, GenerateRevenueView, RemoveView, OpeningInfoView
 from dashboard.views.customer import CustomerView
 from dashboard.views.area import AreaView
 from dashboard.views.sell import SellView, CreateSellView, UpdateSellView
 from dashboard.views.deposite import DepositView, TransactionView, UpdateCustomerDepositView, UpdateMyDepositView, MyDepositView
-from dashboard.views.purchase import PurchaseView, CreatePurchaseView, CommissionView, MyTransactionView, UpdatePurchaseView
+from dashboard.views.purchase import PurchaseView, CreatePurchaseView, CommissionView, MyTransactionView, UpdatePurchaseView, UpdateCommissionView
 
 app_name= 'dashboard'
 
 urlpatterns = [
     path('', DashboardView.as_view(), name="dashboard_url"),
+
+    path('opening-info/', OpeningInfoView.as_view(), name="opening_info_url"),
+
 
     path('area/', AreaView.as_view(), name="area_url"),
     
@@ -39,6 +42,8 @@ urlpatterns = [
 
 
     path('commission/', CommissionView.as_view(), name="commission_url"),
+    path('update-commission/<int:id>/', UpdateCommissionView.as_view(), name="update_commission_url"),
+
     path('my-transaction/', MyTransactionView.as_view(), name="my_transaction_url"),
 
     path('revenue/', RevenueView.as_view(), name="revenue_url"),

@@ -52,7 +52,8 @@
                                     <td >{{ ar.amount }}</td>
                                      <td >
                                 <i onclick="remove_sell('{{ar.id}}')" style="color:red; cursor:pointer" class="fa fa-trash"></i>
-                        
+                               <a href="{% url 'dashboard:update_commission_url' ar.id %}"> <i style="color:red; cursor:pointer; padding-left: 1em;" class="fa fa-edit"></i> <a>
+                         
                                 </td>
                                 </tr>
                                 {% endfor %}

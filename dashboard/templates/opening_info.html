@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<div class="container">
+      <form method="POST">
+          {% csrf_token %}
+      <div class="modal-body">
+       
+        <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">PCC Stock</label>
+            <div class="col-sm-6">
+            <input  min="0" step="1" oninput="validity.valid||(value='');"  value="{{ opening_info.pcc }}" name="pcc" type="number" class="form-control" id="pcc" required>
+            </div>
+        </div>
+         <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">OPC Stock</label>
+            <div class="col-sm-6">
+            <input  min="0" step="1" oninput="validity.valid||(value='');"  value="{{ opening_info.opc }}" type="number" class="form-control" name="opc" id="opc" required>
+            </div>
+        </div>
+<div class="form-group row">
+            <label class="col-sm-2 col-form-label">OP B Type</label>
+            <div class="col-sm-6">
+                <select name="op_balance_type" class="form-control" id="op_balance_type" required>
+        
+                <option {% if opening_info.my_balance_type == 1 %} selected {% endif %} value="1">Plus</option>
+                <option {% if opening_info.my_balance_type == 2 %} selected {% endif %} value="2">Minus</option>
+                </select>
+            </div>
+        </div>
+
+         <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">My Opening Balance</label>
+            <div class="col-sm-6">
+            <input  value="{{ opening_info.my_balance }}" min="0" step="1" oninput="validity.valid||(value='');" type="number" class="form-control" id="opening_balance" name="opening_balance">
+            </div>
+        </div>
+
+      </div>
+
+         <button style="margin-right: 22em;" type="suubmit" class="btn btn-primary float-right"> Update</button>
+            
+      
+    </form>
+</div>
+
+{% endblock %}
+{% block script %}
+
+    <script>
+
+    </script>
+{% endblock %}

@@ -78,7 +78,7 @@
                 <div class="row">
                     <div class="col-8">
                         <p style="color: black;"> My Balance  </p>
-                        <h2 class="font-bold">{{ balance.current_balance }}</h2>
+                        <h2 class="font-bold">{{ my_balance }}</h2>
                     </div>
                 </div>
             </div>
@@ -88,7 +88,7 @@
                 <div class="row">
                     <div class="col-8">
                         <p style="color: black;"> My Due </p>
-                        <h2 class="font-bold"> {{ balance.due_amount }} </h2>
+                        <h2 class="font-bold"> {{ my_due }} </h2>
                     </div>
                 </div>
             </div>
@@ -151,40 +151,37 @@
     <div class="col-lg-12">
         <div class="wrapper wrapper-content animated fadeInRight">
             <div class="card">
-                <h3 class="card-header" style="background-color: #081E3C; color:#fff">Date VS Purchase Count</h3>
+                <h3 class="card-header" style="background-color: #081E3C; color:#fff">Top 10 Customer By Amount</h3>
                 <div class="card-body">
-                    <div id="chartdiv" style="min-height: 10rem"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row p-4">
-    <div class="col-lg-12">
-        <div class="wrapper wrapper-content animated fadeInRight">
-            <div class="card">
-                <h3 class="card-header" style="background-color: #081E3C; color:#fff">Date VS Purchase Count</h3>
-                <div class="card-body">
-                    <div id="date_vs_purchase_chart" style="min-height: 10rem"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row p-4">
-    <div class="col-lg-12">
-        <div class="wrapper wrapper-content animated fadeInRight">
-            <div class="card">
-                <h3 class="card-header" style="background-color: #081E3C; color:#fff">Payment Method</h3>
-                <div class="card-body">
-                    <div id="paymentchartdiv" style="min-height: 10rem"></div>
+                                            <div class="card-body table-responsive">
+    
+                            <table  class="table table-borderless table-striped table-hover">
+     
+                                <tr>
+                                    
+                                    <th>Name </th>
+                                    <th>Quantity </th>
+                                    <th>Total Amount </th>
+
+                                </tr>
+                                {% for ar in top_10_customer %}
+                                <tr id="{{ ar.id }}">
+                            
+                                    <td>{{ ar.customer__name }} </td>
+                                    <td>{{ ar.quantity }} </td>
+                                    <td >{{ ar.total_buy }}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-        <div class="row p-4">
+
+        {% comment %} <div class="row p-4">
           <div class="col-12">
             <div class="card">
               <div class="card-header">
@@ -215,7 +212,7 @@
             </div>
             <!-- /.card -->
           </div>
-        </div>
+        </div> {% endcomment %}
 
  </div>
 
