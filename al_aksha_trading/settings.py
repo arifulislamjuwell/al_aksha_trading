@@ -4,16 +4,16 @@ from pathlib import Path
 from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+from decouple import config
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'r%@u^tguz*jt122@!*6ae1h5fe!(y%qqym5$*8$m*m6mp%5&ij'
+SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = True
+DEBUG = config('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'dashboard',
-    'multiselectfield'
 ]
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 MIDDLEWARE = [
@@ -105,17 +104,29 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
+
+if config('LOCAL'):
+    STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR / "db.sqlite3"),
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': str(BASE_DIR / "db.sqlite3"),
+        }
     }
+else:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': '45.32.117.126',
+            'PORT': '5432',
+        }
 }
-
 
 
 MEDIA_ROOT =  os.path.join(BASE_DIR, 'media') 
