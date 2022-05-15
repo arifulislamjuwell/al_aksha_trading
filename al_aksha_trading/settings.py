@@ -123,7 +123,7 @@ else:
             'NAME': config('DB_NAME'),
             'USER': config('DB_USER'),
             'PASSWORD': config('DB_PASSWORD'),
-            'HOST': '45.32.117.126',
+            'HOST': 'localhost',
             'PORT': '5432',
         }
 }
