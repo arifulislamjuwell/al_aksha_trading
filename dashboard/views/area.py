@@ -14,7 +14,7 @@ class AreaView(LoginRequiredMixin, View):
     def get(self, request):
         data= request.GET
         name= data.get('area')
-        area= Area.objects.all().order_by('-id')
+        area= Area.objects.all()
         if name:
             area= area.filter(name__icontains= name)
         context={

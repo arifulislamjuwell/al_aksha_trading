@@ -11,13 +11,16 @@
                 <div class="card-body">
                     <form>
                         <div class="row">
+                            <div class="col-md-1">
+                                <input value="{{ request.GET.id }}" name="id" placeholder="id" type="text" class="form-control"/>
+                            </div>
                             <div class="col-md-2">
                               
                                 <input value="{{ request.GET.customer }}" name="customer" placeholder="Name, Phone Number" type="text" class="form-control"/>
                             </div>
-                                                        <div class="col-md-3">
+                                <div class="col-md-3">
                               
-                                                 <div class="input-group">
+                    <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">
                         <i class="far fa-calendar-alt"></i>

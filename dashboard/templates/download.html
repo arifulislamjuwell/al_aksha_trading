@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <form>
+                    <input type="hidden" value="my_t" name="type_">
+                        <div class="row">
+                            <div class="col-md-4">
+                             <h2>My Transaction </h2>
+                            </div>
+ 
+                            <div class="col-md-3">
+                              <input required value="{{ request.GET.bdaymonth }}" class="form-control" type="month" id="bdaymonth" name="bdaymonth">
+                            </div>
+
+                            <div class="col-md-2">
+                           
+                                <button class="btn btn-block btn-secondary">Download</button>
+                            </div>
+ 
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+var dateObj = new Date();
+var date = dateObj.toISOString().slice(0, 10).split('-')
+var monthControl = document.querySelector('input[type="month"]');
+monthControl.value = `${date[0]}-${date[1]}`;
+</script>
+
+{% endblock %}

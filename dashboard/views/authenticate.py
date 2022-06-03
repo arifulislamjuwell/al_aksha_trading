@@ -31,7 +31,6 @@ class AuthenticationView(View):
                 user= User.objects.get(username= username)
             except Exception as e:
                 return render(request,'login.html',{'error':'This Number doesn\'t exist, please input your valid Number'})
-            print(user,'---------------')
             if user.check_password(password):
                 user= auth.authenticate(username=user.username, password=password)
                 if user is not None:

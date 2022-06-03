@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 import logging
 from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
+from utils.transaction import my_transasction_dict_make
+
 
 logger = logging.getLogger('tutul_traders')
 
@@ -13,8 +15,15 @@ class PurchaseView(LoginRequiredMixin, View):
 
     def get(self, request):
         data= request.GET
-
+        id= data.get('id')
+        cement_search= data.get('type')
         purchase= Purchase.objects.all().order_by('-id')
+        
+        if id:
+            purchase = purchase.filter(id = id)
+        if cement_search:
+            purchase = purchase.filter(cement_type = cement_search)
+
         context={
              'purchase': purchase,
         }
@@ -117,46 +126,9 @@ class MyTransactionView(LoginRequiredMixin, View):
         if opening_information:
             opening_balance = -opening_information.my_balance if opening_information.my_balance_type == MINUS else opening_information.my_balance
         current_balance = opening_balance
-        row_list = []
-        transactions= MyTransaction.objects.all().order_by('-id')
-        for transaction in transactions:
-            content_object = transaction.content_object
-            dic ={'id': transaction.id }
-            if transaction.transaction_type == BUY:
-                sub_total = content_object.sub_total
-                quantity = content_object.quantity
-                dic['date'] = content_object.created_at
-                dic['transaction_type'] = 'Purchase'
-                dic['quantity'] = quantity
-                dic['details'] = '{} BAGS-50KG({})'.format(quantity,content_object.get_cement_type_display())
-                dic['total_bill'] = sub_total
-                dic['paid'] = 0
-                current_balance = current_balance - sub_total
-                dic['current_balance'] = current_balance
-
-            elif transaction.transaction_type == DEPOSITE:
-                amount = content_object.amount
-                dic['date'] = content_object.created_at
-                dic['transaction_type'] = 'DEPOSIT'
-                dic['quantity'] = ''
-                dic['details'] = content_object.note
-                dic['total_bill'] = ''
-                dic['paid'] = amount
-                current_balance = current_balance  + amount
-                dic['current_balance'] = current_balance
-            
-            else:
-                amount = content_object.amount
-                dic['date'] = content_object.date
-                dic['transaction_type'] = 'COMMISSION'
-                dic['quantity'] = ''
-                dic['details'] = content_object.note
-                dic['total_bill'] = ''
-                dic['paid'] = amount
-                current_balance = current_balance  + amount
-                dic['current_balance'] = current_balance 
-
-            row_list.append(dic)
+        
+        transactions= MyTransaction.objects.all()
+        row_list = my_transasction_dict_make(transactions, current_balance)
             
         context={
             'row_list': row_list,

@@ -36,11 +36,13 @@ class DepositView(LoginRequiredMixin, View):
         customer= data.get('customer')
         amount= data.get('amount')
         date= data.get('date')
+        note= data.get('note')
 
         depo = CustomerDeposit()
         depo.customer_id= customer
         depo.amount= amount
         depo.created_at = date
+        depo.note = note
         depo.save()
 
         return redirect('dashboard:deposite_url')
@@ -53,10 +55,11 @@ class TransactionView(LoginRequiredMixin, View):
         opening_balance = -customer.opening_balance if customer.opening_balance_type == MINUS else customer.opening_balance
         current_balance = opening_balance
         row_list = []
-        transactions= CustomerTransaction.objects.filter(customer= customer).order_by('-id')
+        transactions= CustomerTransaction.objects.filter(customer= customer)
         for transaction in transactions:
             content_object = transaction.content_object
-            dic ={'id': transaction.id }
+            dic= {}
+            dic ={'id': content_object.id }
             if transaction.transaction_type == BUY:
                 total_bill = content_object.total_bill
                 paid_amount =  content_object.paid_amount
@@ -67,6 +70,7 @@ class TransactionView(LoginRequiredMixin, View):
                 dic['details'] = '{} BAGS-50KG({})'.format(quantity,content_object.get_cement_type_display())
                 dic['date'] = content_object.created_at
                 dic['total_bill'] = total_bill
+                dic['type_'] = 1
                 dic['paid'] = content_object.paid_amount
                 current_balance = (current_balance - total_bill) + paid_amount
                 dic['current_balance'] = current_balance
@@ -76,10 +80,11 @@ class TransactionView(LoginRequiredMixin, View):
                 dic['date'] = content_object.created_at
                 dic['transaction_type'] = 'DEPOSITE'
                 dic['quantity'] = ''
-                dic['details'] = ''
+                dic['details'] = content_object.note
                 dic['date'] = content_object.created_at
                 dic['total_bill'] = ''
                 dic['paid'] = amount
+                dic['type_'] = 2
                 current_balance = current_balance  + amount
                 dic['current_balance'] = current_balance
 
@@ -99,7 +104,7 @@ class TransactionView(LoginRequiredMixin, View):
 class UpdateCustomerDepositView(View):
 
     def get(self, request, id):
-        deposit= Deposite.objects.get(id= id)
+        deposit= CustomerDeposit.objects.get(id= id)
         customer= Customer.objects.values('id', 'name', 'phone_number')
 
         context={
@@ -115,10 +120,12 @@ class UpdateCustomerDepositView(View):
         customer= data.get('customer')
         amount= data.get('amount')
         date= data.get('date')
+        note= data.get('note')
 
-        depo = Deposite.objects.get(id = id)
+        depo = CustomerDeposit.objects.get(id = id)
         depo.customer_id= customer
         depo.amount= amount
+        depo.note = note
         depo.created_at = date
         depo.save()
 

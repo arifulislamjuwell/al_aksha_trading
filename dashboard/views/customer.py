@@ -16,7 +16,7 @@ class CustomerView(LoginRequiredMixin, View):
             data= request.GET
             customer_search= data.get('customer')
             area_search= data.get('area')
-            customer= Customer.objects.all().order_by('-id')
+            customer= Customer.objects.all()
             if customer_search:
                 customer= customer.filter(
                     Q(name__icontains= customer_search) |

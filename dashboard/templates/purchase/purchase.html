@@ -11,19 +11,10 @@
                 <div class="card-body">
                     <form>
                         <div class="row">
-                            <div class="col-md-3">
-                              
-                                <input value="{{ request.GET.customer }}" name="customer" placeholder="Name, Phone Number" type="text" class="form-control"/>
+                             <div class="col-md-1">
+                                <input value="{{ request.GET.id }}" name="id" placeholder="id" type="text" class="form-control"/>
                             </div>
 
-                            <div class="col-md-3">
-                                <select name="area" class="form-control">
-                                    <option disabled selected>Select Area</option>
-                                    {% for a in area %}
-                                    <option value="{{ a.id }}" {% if request.GET.area|stringformat:'s' == a.id|stringformat:'s' %}selected{% endif %}>{{ a.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
                             <div class="col-md-3">
                             
                                 <select name="type" class="form-control">

@@ -18,10 +18,14 @@ class SellView(LoginRequiredMixin, View):
         area_search= data.get('area')
         cement_search= data.get('type')
         range= data.get('range')
+        id= data.get('id')
         
         customer= Customer.objects.all().order_by('-id')
         sell= Sell.objects.all().order_by('-id')
         area= Area.objects.all().order_by('-id')
+
+        if id:
+            sell= sell.filter(id= id)
 
         if cement_search:
             sell= sell.filter(cement_type= cement_search)

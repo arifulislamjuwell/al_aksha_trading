@@ -77,8 +77,8 @@ class DashboardView(LoginRequiredMixin, View):
 class RevenueView(LoginRequiredMixin, View):
 
     def get(self, request):
-        customer= Customer.objects.all().order_by('-id')
-        revenue= Revenue.objects.all().order_by('-id')
+        customer= Customer.objects.all()
+        revenue= Revenue.objects.all()
         return render(request, 'revenue.html',{'revenue': revenue, 'customer': customer})
 
 class GenerateRevenueView(LoginRequiredMixin, View):

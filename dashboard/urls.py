@@ -8,7 +8,7 @@ from dashboard.views.area import AreaView
 from dashboard.views.sell import SellView, CreateSellView, UpdateSellView
 from dashboard.views.deposite import DepositView, TransactionView, UpdateCustomerDepositView, UpdateMyDepositView, MyDepositView
 from dashboard.views.purchase import PurchaseView, CreatePurchaseView, CommissionView, MyTransactionView, UpdatePurchaseView, UpdateCommissionView
-
+from dashboard.views.download_view import DownloadView
 app_name= 'dashboard'
 
 urlpatterns = [
@@ -51,6 +51,9 @@ urlpatterns = [
 
 
     path('remove/', RemoveView.as_view(), name="remove_url"),
+
+    path('download/', DownloadView.as_view(), name="download_url"),
+
 
 ]
 

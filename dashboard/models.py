@@ -145,6 +145,7 @@ class CustomerDeposit(models.Model):
     customer= models.ForeignKey(Customer,related_name='customer_deposites', on_delete=models.CASCADE, null=True)
     amount= models.IntegerField()
     created_at= models.DateField( auto_now_add=False)
+    note = models.TextField()
     customer_transactions = GenericRelation(CustomerTransaction)
 
 @receiver(post_save, sender=CustomerDeposit)

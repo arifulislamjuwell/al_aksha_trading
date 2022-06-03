@@ -58,6 +58,7 @@
                                 <th> Bill</th>
                                 <th> Paid</th>
                                 <th> Current Balance</th>
+                                <th> Edit </th>
 
                             </tr>
                             <tr>
@@ -85,6 +86,16 @@
                                 <td >{{ trans.total_bill }}</td>
                                 <td >{{ trans.paid }}</td>
                                 <td >{{ trans.current_balance }}</td>
+
+                                <td >
+                                    {% if trans.type_ == 1 %}
+                                    <a style="color:red; cursor:pointer; padding-left: 1em;" href="{% url 'dashboard:update_purchase_url' trans.id %}"> <i  class="fa fa-edit"></i> <a>
+                                    {% elif trans.type_ == 2 %}
+                                    <a style="color:red; cursor:pointer; padding-left: 1em;" href="{% url 'dashboard:update_my_deposit_url' trans.id %}"> <i  class="fa fa-edit"></i> <a>
+                                    {% else %}
+                                    <a style="color:red; cursor:pointer; padding-left: 1em;" href="{% url 'dashboard:update_commission_url' trans.id %}"> <i  class="fa fa-edit"></i> <a>
+                                    {% endif %}
+                                </td>
 
                             </tr>
                             {% endfor %}
