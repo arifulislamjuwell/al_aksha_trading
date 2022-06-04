@@ -34,7 +34,9 @@
                   {% include 'partial/sidebar/my_transaction_menu.html' %}
                   {% include 'partial/sidebar/customer_menu.html' %}
                   {% include 'partial/sidebar/area_menu.html' %}
+                  {% if request.user.username == 'monty' %}
                   {% include 'partial/sidebar/revenue_menu.html' %}
+                  {% endif %}
                   {% include 'partial/sidebar/opening_info.html' %}
                   {% include 'partial/sidebar/download.html' %}
 
