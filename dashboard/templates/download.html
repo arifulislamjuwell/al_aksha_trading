@@ -12,8 +12,8 @@
                     <form>
                     <input type="hidden" value="my_t" name="type_">
                         <div class="row">
-                            <div class="col-md-4">
-                             <h2>My Transaction </h2>
+                            <div class="col-md-3">
+                             <h3>My Transaction </h3>
                             </div>
  
                             <div class="col-md-3">
@@ -22,6 +22,41 @@
 
                             <div class="col-md-2">
                            
+                                <button class="btn btn-block btn-secondary">Download</button>
+                            </div>
+ 
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <form>
+                    <input type="hidden" value="cus_t" name="type_">
+                        <div class="row">
+                            <div class="col-md-3">
+                             <h3>Customer Transaction </h3>
+                            </div>
+                             <div class="col-md-3">
+                                    <select name="customer" id="customer" class=" form-control select2bs4" style="width: 100%;" required> 
+                                        <option value="">Select Customer</option>
+                                        {% for c in customers %}
+                                            <option value="{{ c.id }}"> {{ c.name }}- {{ c.phone_number }}  </option>
+                                        {% endfor %}
+                
+                                    </select>
+                            </div>
+                            <div class="col-md-3">
+                              <input required value="{{ request.GET.bdaymonth }}" class="form-control" type="month" id="month" name="bdaymonth">
+                            </div>
+
+                            <div class="col-md-2">
                                 <button class="btn btn-block btn-secondary">Download</button>
                             </div>
  
@@ -41,8 +76,19 @@
 <script>
 var dateObj = new Date();
 var date = dateObj.toISOString().slice(0, 10).split('-')
-var monthControl = document.querySelector('input[type="month"]');
-monthControl.value = `${date[0]}-${date[1]}`;
+
+var inputs = document.getElementsByTagName('input');
+
+for(var i = 0; i < inputs.length; i++) {
+    if(inputs[i].type.toLowerCase() == 'month') {
+        inputs[i].value =  `${date[0]}-${date[1]}`;
+    }
+}
+
+
+        $(".select2bs4").select2({
+            theme: "bootstrap4",
+        });
 </script>
 
 {% endblock %}
