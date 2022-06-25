@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import User
 import logging
-from dashboard.models import Area, Customer, CustomerTransaction, CustomerDeposit, MyDeposite, BUY, MINUS
+from dashboard.models import CASH, Area, BUY, BankDeposit, Customer, CustomerDeposit, CustomerTransaction, MINUS, MyDeposite, BALANCE_SECTOR
 from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
 from utils.transaction import customer_transasction_dict_make
@@ -43,6 +43,7 @@ class DepositView(LoginRequiredMixin, View):
         depo.customer_id= customer
         depo.amount= amount
         depo.created_at = date
+        depo.balance_sector = CASH
         depo.note = note
         depo.save()
 
@@ -147,3 +148,58 @@ class UpdateMyDepositView(View):
         depo.save()
 
         return redirect('dashboard:my_deposite_url')
+
+
+
+
+class BankDepositView(LoginRequiredMixin, View):
+
+    def get(self, request):
+        data= request.GET
+        account= data.get('account')
+        deposite= BankDeposit.objects.all()
+        if account:
+            deposite= deposite.filter(account= account)
+
+        context={
+            'deposites': deposite,
+            'BALANCE_SECTOR': BALANCE_SECTOR
+        }
+        return render( request, 'deposit/bank_deposit.html', context)
+
+    def post(self, request):
+        data= request.POST
+        account= data.get('account')
+        amount= data.get('amount')
+        date= data.get('date')
+
+        BankDeposit.objects.create(account= account, amount= amount, created_at = date)
+        return redirect('dashboard:bank_deposit_url')
+
+
+class UpdateBankDepositView(View):
+
+    def get(self, request, id):
+        deposit= BankDeposit.objects.get(id= id)
+ 
+        context={
+            'deposit': deposit,
+            'BALANCE_SECTOR': BALANCE_SECTOR
+          
+        }
+        return render( request, 'deposit/update_bank_deposit.html', context)
+
+
+    def post(self, request, id):
+        data= request.POST
+        account= data.get('account')
+        amount= data.get('amount')
+        date= data.get('date')
+
+        depo = BankDeposit.objects.get(id = id)
+        depo.account= account
+        depo.amount= amount
+        depo.created_at = date
+        depo.save()
+
+        return redirect('dashboard:bank_deposit_url')

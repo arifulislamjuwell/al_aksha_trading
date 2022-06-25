@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from dashboard.models import BUY, COMMISSION,DEPOSITE, Area, Commission, Customer, MyDeposite, MyTransaction, OpeningInformation, Purchase, Sell, MINUS
+from dashboard.models import BALANCE_SECTOR, BUY, COMMISSION,DEPOSITE, Area, Commission, Customer, MyDeposite, MyTransaction, OpeningInformation, Purchase, Sell, MINUS
 from django.contrib.auth.models import User
 import logging
 from django.db.models import Q
@@ -33,7 +33,8 @@ class PurchaseView(LoginRequiredMixin, View):
 class CreatePurchaseView(LoginRequiredMixin, View):
 
     def get(self, request):
-        return render(request, 'purchase/create_purchase.html')
+        
+        return render(request, 'purchase/create_purchase.html', {'BALANCE_SECTOR': BALANCE_SECTOR})
 
     def post(self,  request):
         data= request.POST  
@@ -42,9 +43,11 @@ class CreatePurchaseView(LoginRequiredMixin, View):
         quantity= data.get('quantity')
         unit_price= data.get('unit_price')
         total= data.get('total')
+        account = data.get('account')
         date= data.get('date')
 
         purchase= Purchase()
+        purchase.balance_sector = int(account)
         purchase.sub_total= int(total)
         purchase.cement_type= int(cement_type)
         purchase.unit_price= float(unit_price)
@@ -143,7 +146,7 @@ class UpdatePurchaseView(View):
 
     def get(self, request, id):
         purchase = Purchase.objects.get(id= id)
-        return render(request, 'purchase/update_purchase.html', {'purchase': purchase})
+        return render(request, 'purchase/update_purchase.html', {'purchase': purchase, 'BALANCE_SECTOR': BALANCE_SECTOR})
 
     def post(self,  request, id):
         data= request.POST  
@@ -152,9 +155,11 @@ class UpdatePurchaseView(View):
         unit_price= data.get('unit_price')
         total= data.get('total')
         date= data.get('date')
+        account = data.get('account')
 
         purchase= Purchase.objects.get(id= id)
         purchase.sub_total= int(total)
+        purchase.balance_sector = int(account)
         purchase.cement_type= int(cement_type)
         purchase.unit_price= float(unit_price)
         purchase.quantity= int(quantity)

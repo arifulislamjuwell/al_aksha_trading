@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from dashboard.models import Area, Customer, CustomerTransaction, CustomerDeposit, OPC, Sell, BUY
+from dashboard.models import Area, Customer, CustomerTransaction, CustomerDeposit, OPC, Sell, BUY, CASH
 from django.contrib.auth.models import User
 import logging
 from django.db.models import Q
@@ -80,6 +80,7 @@ class CreateSellView(LoginRequiredMixin , View):
         sell.quantity= int(quantity)
         sell.total_bill = int(total)
         sell.unit_price =  float(unit_price)
+        sell.balance_sector = CASH
         sell.created_at = date
         sell.save()
         return redirect('dashboard:sell_url')

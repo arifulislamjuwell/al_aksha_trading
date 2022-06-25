@@ -30,12 +30,38 @@ TRANSACTION_TYPE= (
 PLUS =1
 MINUS = 2
 
+NONE = 1
+CASH = 2
+AIBL = 3
+SIBL = 4
+BANK_ASIA = 5
+
+
+BALANCE_SECTOR = (
+    (NONE, 'None'),
+    (CASH, 'CASH'),
+    (AIBL, 'AIBL'),
+    (SIBL, 'SIBL'),
+    (BANK_ASIA, 'BANK ASIA'),
+
+)
+
+
+class BankDeposit(models.Model):
+    account = models.PositiveSmallIntegerField(choices = BALANCE_SECTOR)
+    amount = models.IntegerField(default = 0)
+    created_at= models.DateField( auto_now_add=False)
+
 
 class OpeningInformation(models.Model):
     pcc= models.IntegerField(default = 0)
     opc= models.IntegerField(default = 0)
     my_balance_type = models.IntegerField(default = MINUS)
     my_balance = models.IntegerField(default = 0)
+    cash_amount = models.IntegerField(default = 0)
+    aibl_amount = models.IntegerField(default = 0)
+    sibl_amount = models.IntegerField(default = 0)
+    asia_amount = models.IntegerField(default = 0)
 
 
 class MyRevenue(models.Model):
@@ -74,7 +100,9 @@ class Purchase(models.Model):
     quantity= models.IntegerField()
     unit_price= models.FloatField()
     created_at= models.DateField( auto_now_add=False)
+    balance_sector = models.PositiveSmallIntegerField(choices = BALANCE_SECTOR, default = NONE)
     my_transactions = GenericRelation(MyTransaction)
+
 
 
 @receiver(post_save, sender=Purchase)
@@ -117,6 +145,7 @@ class Customer(models.Model):
         total_deposit =  total_deposit.get('amount__sum') if total_deposit.get('amount__sum') else 0
         return (opening_balance - total_bill) + total_paid + total_deposit
 
+
 class CustomerTransaction(models.Model):
     customer= models.ForeignKey(Customer,related_name='transaction', on_delete=models.CASCADE)
     transaction_type= models.PositiveSmallIntegerField(choices= TRANSACTION_TYPE)
@@ -138,6 +167,7 @@ class Sell(models.Model):
     total_bill= models.IntegerField(default= 0)
     paid_amount= models.IntegerField(default= 0)
     created_at= models.DateField(auto_now_add=False)
+    balance_sector = models.PositiveSmallIntegerField(choices = BALANCE_SECTOR, default = NONE)
     customer_transactions = GenericRelation(CustomerTransaction)
 
 
@@ -146,6 +176,7 @@ class CustomerDeposit(models.Model):
     amount= models.IntegerField()
     created_at= models.DateField( auto_now_add=False)
     note = models.TextField()
+    balance_sector = models.PositiveSmallIntegerField(choices = BALANCE_SECTOR, default = NONE)
     customer_transactions = GenericRelation(CustomerTransaction)
 
 @receiver(post_save, sender=CustomerDeposit)

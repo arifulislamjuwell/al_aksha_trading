@@ -2,13 +2,14 @@
 from django.contrib import admin
 from django.urls import path, include
 
-from dashboard.views.dashboard import DashboardView, RevenueView, GenerateRevenueView, RemoveView, OpeningInfoView
+from dashboard.views.dashboard import DashboardView, RevenueView, GenerateRevenueView, RemoveView, OpeningInfoView ,AccountView
 from dashboard.views.customer import CustomerView
 from dashboard.views.area import AreaView
 from dashboard.views.sell import SellView, CreateSellView, UpdateSellView
-from dashboard.views.deposite import DepositView, TransactionView, UpdateCustomerDepositView, UpdateMyDepositView, MyDepositView
+from dashboard.views.deposite import BankDepositView, DepositView, MyDepositView, TransactionView, UpdateBankDepositView, UpdateCustomerDepositView, UpdateMyDepositView
 from dashboard.views.purchase import PurchaseView, CreatePurchaseView, CommissionView, MyTransactionView, UpdatePurchaseView, UpdateCommissionView
 from dashboard.views.download_view import DownloadView
+
 app_name= 'dashboard'
 
 urlpatterns = [
@@ -53,6 +54,11 @@ urlpatterns = [
     path('remove/', RemoveView.as_view(), name="remove_url"),
 
     path('download/', DownloadView.as_view(), name="download_url"),
+
+    path('bank-deposit/', BankDepositView.as_view(), name="bank_deposit_url"),
+    path('update-bank-deposit/<int:id>/', UpdateBankDepositView.as_view(), name="update_bank_deposit_url"),
+
+    path('account/', AccountView.as_view(), name="account_url"),
 
 
 ]

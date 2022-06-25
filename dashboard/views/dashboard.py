@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import User
 import logging
-from dashboard.models import MINUS, Commission, Customer, CustomerDeposit, MyDeposite, OPC, OpeningInformation, PCC, Purchase, Revenue, Sell
+from dashboard.models import CASH, BankDeposit, Commission, Customer, CustomerDeposit, MINUS, MyDeposite, OPC, OpeningInformation, PCC, Purchase, Revenue, Sell
 from django.db.models import Sum
 from datetime import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -148,6 +148,8 @@ class RemoveView(View):
             model= Commission
         if sector == '6':
             model= Customer
+        if sector == '7':
+            model= BankDeposit
         model.objects.get(id= id_).delete()
         return JsonResponse({'id': id_})
 
@@ -165,6 +167,11 @@ class OpeningInfoView(View):
         pcc= data.get('pcc')
         op_balance_type= data.get('op_balance_type')
         opening_balance= data.get('opening_balance')
+        cash_amount= data.get('cash_amount')
+        aibl_amount= data.get('aibl_amount')
+        sibl_amount= data.get('sibl_amount')
+        asia_amount= data.get('asia_amount')
+
         opening_info = OpeningInformation.objects.first()
         if not opening_info:
             opening_info = OpeningInformation()
@@ -173,5 +180,73 @@ class OpeningInfoView(View):
         opening_info.my_balance = opening_balance
         opening_info.pcc = pcc
         opening_info.opc = opc
+        opening_info.cash_amount = cash_amount
+        opening_info.aibl_amount = aibl_amount
+        opening_info.sibl_amount = sibl_amount
+        opening_info.asia_amount = asia_amount
+
         opening_info.save() 
         return redirect('dashboard:opening_info_url')
+
+
+
+class AccountView(View):
+
+    def get(self, request):
+        openinf_info = OpeningInformation.objects.values().first()
+        cash_amount = openinf_info.get('cash_amount')
+        aibl_amount = openinf_info.get('aibl_amount')
+        sibl_amount = openinf_info.get('sibl_amount')
+        asia_amount = openinf_info.get('asia_amount')
+
+        paid_amount = Sell.objects.filter(balance_sector = CASH).aggregate(Sum('paid_amount')).get('paid_amount__sum')
+        if not paid_amount:
+            paid_amount = 0
+
+        customer_deposit = CustomerDeposit.objects.filter(balance_sector = CASH).aggregate(Sum('amount')).get('amount__sum')
+        if not customer_deposit:
+            customer_deposit = 0
+
+
+        bank_depo = BankDeposit.objects.values('account').order_by('account').annotate(total_price=Sum('amount'))
+        aibl_depo= 0
+        sibl_depo = 0
+        asia_dipo = 0
+        for i in bank_depo:
+            if i.get('account') == 3:
+                aibl_depo = i.get('total_price')
+            if i.get('account') == 4:
+                sibl_depo = i.get('total_price')
+            if i.get('account') == 5:
+                asia_dipo = i.get('total_price')
+       
+        purchases = Purchase.objects.values('balance_sector').order_by('balance_sector').annotate(total_price=Sum('sub_total'))
+        cash_purchae= 0
+        aibl_purchase= 0
+        sibl_purchase = 0
+        asia_purchase = 0
+        for i in purchases:
+            if i.get('balance_sector') == 2:
+                cash_purchae = i.get('total_price')
+            if i.get('balance_sector') == 3:
+                aibl_purchase = i.get('total_price')            
+            if i.get('balance_sector') == 4:
+                sibl_purchase = i.get('total_price')            
+            if i.get('balance_sector') == 5:
+                asia_purchase = i.get('total_price')            
+
+
+        total_cash = (cash_amount + paid_amount + customer_deposit) - (cash_purchae + aibl_depo + sibl_depo + asia_dipo)
+        total_aibl_amount = (aibl_amount + aibl_depo) - aibl_purchase
+        total_sibl_amount = (sibl_amount + sibl_depo) - sibl_purchase
+        total_asia_amount = (asia_amount + asia_dipo) - asia_purchase
+
+        context = {
+            'total_cash': total_cash,
+            "total_aibl_amount":total_aibl_amount,
+            "total_sibl_amount":total_sibl_amount,
+            "total_asia_amount":total_asia_amount,
+
+        }
+        return render(request, 'account.html', context)
+

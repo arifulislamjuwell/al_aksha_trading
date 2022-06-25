@@ -39,6 +39,36 @@
             </div>
         </div>
 
+
+         <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Cash </label>
+            <div class="col-sm-6">
+            <input  value="{{ opening_info.cash_amount }}" min="0" step="1" oninput="validity.valid||(value='');" type="number" class="form-control" id="cash_amount" name="cash_amount">
+            </div>
+        </div>
+
+                 <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">AIBL</label>
+            <div class="col-sm-6">
+            <input  value="{{ opening_info.aibl_amount }}" min="0" step="1" oninput="validity.valid||(value='');" type="number" class="form-control" id="aibl_amount" name="aibl_amount">
+            </div>
+        </div>
+
+                 <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">SIBL</label>
+            <div class="col-sm-6">
+            <input  value="{{ opening_info.sibl_amount }}" min="0" step="1" oninput="validity.valid||(value='');" type="number" class="form-control" id="sibl_amount" name="sibl_amount">
+            </div>
+        </div>
+
+                 <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">BANK ASIA</label>
+            <div class="col-sm-6">
+            <input  value="{{ opening_info.asia_amount }}" min="0" step="1" oninput="validity.valid||(value='');" type="number" class="form-control" id="asia_amount" name="asia_amount">
+            </div>
+        </div>
+
+
       </div>
 
          <button style="margin-right: 22em;" type="suubmit" class="btn btn-primary float-right"> Update</button>
